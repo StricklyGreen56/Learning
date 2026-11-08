@@ -113,3 +113,6 @@ table th:first-child{font-size:16px}
 .gradebox>summary::-webkit-details-marker{display:none}
 .gradebox>summary h2::before{content:'▸ ';color:var(--muted)}
 .gradebox[open]>summary h2::before{content:'▾ '}
+
+.pin::placeholder{letter-spacing:normal}
+.kidline{display:flex;align-items:center;gap:8px}

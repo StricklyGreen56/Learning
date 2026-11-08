@@ -173,18 +173,21 @@ function setupPage(){
     <div class="card">
       <h2>1. Grown-up PIN</h2>
       <p class="note">You'll type this to see scores and change settings, so kids can't.</p>
-      <input class="pin" id="pin1" inputmode="numeric" maxlength="4" placeholder="4 digits" autocomplete="off">
-      <input class="pin" id="pin2" inputmode="numeric" maxlength="4" placeholder="Type it again" autocomplete="off">
+      <input class="pin" type="password" id="pin1" inputmode="numeric" maxlength="4" placeholder="4 digits" autocomplete="off">
+      <input class="pin" type="password" id="pin2" inputmode="numeric" maxlength="4" placeholder="Type it again" autocomplete="off">
     </div>` : ''}
     <div class="card">
       <h2>${needPin ? '2. ' : ''}Add your kids</h2>
-      <div id="kidlist">${st.kids.map(k => `<div class="row"><span class="av">${k.avatar}</span> ${esc(k.name)} · ${gradeName(k.grade)}</div>`).join('') || '<p class="note">No kids yet.</p>'}</div>
+      <div id="kidlist">${st.kids.map(k => `<div class="row"><span class="kidline"><span class="av">${k.avatar}</span> <b>${esc(k.name)}</b> · ${gradeName(k.grade)}</span><button class="link" data-edit="${k.id}">Edit</button></div>`).join('') || '<p class="note">No kids yet.</p>'}</div>
       <button class="btn ghost" id="addkid">+ Add a kid</button>
     </div>
     <p class="err" id="err"></p>
     <button class="btn" id="done">Done</button>
     <div class="parent"><button class="link" id="out">Sign out</button></div>`);
-  $('addkid').onclick = () => kidForm(null, setupPage);
+  const keepPins = () => { if (needPin){ st.pin1 = $('pin1').value; st.pin2 = $('pin2').value; } };
+  if (needPin){ $('pin1').value = st.pin1 || ''; $('pin2').value = st.pin2 || ''; }
+  $('addkid').onclick = () => { keepPins(); kidForm(null, setupPage); };
+  app.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => { keepPins(); kidForm(st.kids.find(k => k.id === b.dataset.edit), setupPage); });
   $('out').onclick = () => AUTH.signOut();
   $('done').onclick = async () => {
     $('err').textContent = '';
@@ -196,6 +199,7 @@ function setupPage(){
       catch(e){ return $('err').textContent = 'Couldn\'t save. Check your connection and try again.'; }
     }
     if (!st.kids.length) return $('err').textContent = 'Add at least one kid.';
+    st.pin1 = st.pin2 = '';
     whoPage();
   };
 }
@@ -416,7 +420,7 @@ function parentGate(){
     <div class="center">
       <h1>🔒 Grown-ups only</h1>
       <p class="sub">Enter your PIN.</p>
-      <input class="pin" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN">
+      <input class="pin" type="password" id="pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="PIN">
       <p class="err" id="err"></p>
       <button class="btn" id="go">Open</button>
     </div>`);
@@ -496,8 +500,8 @@ function changePin(){
     <div class="bar"><button class="link" id="back">← Back</button></div>
     <h1>Change PIN</h1>
     <div class="card">
-      <input class="pin" id="p1" inputmode="numeric" maxlength="4" placeholder="New PIN" autocomplete="off">
-      <input class="pin" id="p2" inputmode="numeric" maxlength="4" placeholder="Type it again" autocomplete="off">
+      <input class="pin" type="password" id="p1" inputmode="numeric" maxlength="4" placeholder="New PIN" autocomplete="off">
+      <input class="pin" type="password" id="p2" inputmode="numeric" maxlength="4" placeholder="Type it again" autocomplete="off">
     </div>
     <p class="err" id="err"></p>
     <button class="btn" id="save">Save PIN</button>`);
