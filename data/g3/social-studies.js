@@ -1,5 +1,5 @@
 // Social Studies. Format: [question, [options], correctIndex, why]
-addSubject({
+addSubject({ grade: '3',
   id: 'social', name: 'Social Studies', icon: '🌎', color: '#8a52c7',
   tests: [
     { id:'maps', name:'Maps & Geography', blurb:'Directions, maps, and our world', qs:[

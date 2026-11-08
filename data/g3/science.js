@@ -1,5 +1,5 @@
 // Science. Format: [question, [options], correctIndex, why]
-addSubject({
+addSubject({ grade: '3',
   id: 'science', name: 'Science', icon: '🔬', color: '#2e9d5b',
   tests: [
     { id:'life', name:'Life Cycles & Traits', blurb:'How living things grow and change', qs:[

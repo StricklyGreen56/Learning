@@ -1,5 +1,5 @@
 // Math. Format: [question, [options], correctIndex, why]
-addSubject({
+addSubject({ grade: '3',
   id: 'math', name: 'Math', icon: '🔢', color: '#e0702b',
   tests: [
     { id:'addsub', name:'Adding & Subtracting', blurb:'Numbers up to 1,000 and rounding', qs:[

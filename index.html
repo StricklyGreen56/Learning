@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Let's Practice! 3rd Grade</title>
+<title>Let's Practice!</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
@@ -11,14 +11,21 @@
 </head>
 <body>
 <div class="wrap" id="app"></div>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
 <script>
   window.SUBJECTS = [];
   function addSubject(s){ window.SUBJECTS.push(s); }
 </script>
-<script src="data/reading.js"></script>
-<script src="data/math.js"></script>
-<script src="data/science.js"></script>
-<script src="data/social-studies.js"></script>
+<script src="data/gK/all.js"></script>
+<script src="data/g1/all.js"></script>
+<script src="data/g2/all.js"></script>
+<script src="data/g3/reading.js"></script>
+<script src="data/g3/math.js"></script>
+<script src="data/g3/science.js"></script>
+<script src="data/g3/social-studies.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
