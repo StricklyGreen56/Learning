@@ -10,9 +10,8 @@ Live site: https://stricklygreen56.github.io/Learning/
 - 🔊 **Read to me** reads questions aloud. Turn on automatic read-aloud per kid for early readers.
 
 ## Firebase
-Uses the same Firebase project as the war map (`war-map-74ecc`). Data lives under `families/{parent uid}`.
-`firestore.rules` in this repo is the **full** rules file for that project (war map + this site). Paste it into
-Firebase Console → Firestore Database → Rules → Publish whenever it changes, and keep the war-map repo's copy in sync.
+Uses its own Firebase project (`learning-1be34`, free Spark plan). Data lives under `families/{parent uid}`.
+If `firestore.rules` changes, paste it into Firebase Console → Firestore Database → Rules → Publish.
 
 Test without Firebase: add `?demo` to the URL (saves to the browser only).
 
