@@ -1,0 +1,95 @@
+// Reading & Writing (ELA). Format: [question, [options], correctIndex, why, passageKey?]
+addSubject({
+  id: 'reading', name: 'Reading & Writing', icon: '📖', color: '#3d6fd8',
+  passages: {
+    kite: `<h3>The Kite on the Hill</h3><p>Maya and her grandpa climbed Pine Hill on a windy Saturday. Maya carried a red kite with a long yellow tail. Grandpa carried a thermos of hot cocoa.</p><p>At the top, Maya held the kite up high. "Now let go!" Grandpa called. The wind grabbed the kite and pulled it into the sky. Maya laughed as the string tugged in her hands.</p><p>Suddenly, a strong gust snapped the string. The red kite floated away over the trees. Maya's eyes filled with tears.</p><p>Grandpa put his arm around her. "Let's go look for it," he said. They walked down the other side of the hill. Near the bottom, they spotted a flash of yellow in an apple tree. The kite was stuck in the branches! Grandpa lifted Maya onto his shoulders, and she pulled it free.</p><p>"Next time, we'll tie a stronger knot," Grandpa said with a smile. Maya hugged her kite. Then they sat down and shared the cocoa.</p>`,
+    bees: `<h3>Busy Bees</h3><p>Honeybees live together in a home called a hive. One hive can hold thousands of bees, and each bee has a job.</p><p>Worker bees fly from flower to flower to collect a sweet liquid called nectar. They carry the nectar back to the hive. Inside, the bees pass the nectar from bee to bee and fan it with their wings. This dries the nectar out and slowly turns it into honey. Then the bees store the honey in tiny wax rooms called cells.</p><p>Why do bees work so hard? Honey is their food for winter, when there are no flowers to visit. Bees also help plants. As they move between flowers, they carry pollen, which helps plants make seeds and fruit.</p>`,
+    game: `<h3>The Big Game</h3><p>Carlos had practiced soccer every day for two weeks. On the day of the big game, his stomach felt full of butterflies.</p><p>In the first half, Carlos tried to kick the ball to his teammate, but he missed. The other team scored. Carlos looked down at his shoes. "I'm no good," he mumbled.</p><p>At halftime, Coach Lee knelt beside him. "Everybody misses sometimes," she said. "What matters is that you keep trying."</p><p>In the second half, Carlos ran hard. When the ball rolled toward him, he took a deep breath and kicked. The ball flew past the goalie and into the net! His teammates cheered and lifted him up.</p><p>After the game, Carlos thanked Coach Lee. "I almost gave up," he said. "I'm glad I didn't."</p>`,
+    turtles: `<h3>Sea Turtles</h3><p>Sea turtles are reptiles that live in the ocean. They have been on Earth for millions of years. Unlike land turtles, sea turtles cannot pull their heads and legs into their shells. Instead, they have strong flippers that help them swim long distances.</p><p>A mother sea turtle crawls onto a sandy beach at night to lay her eggs. She digs a hole, lays about 100 eggs, and covers them with sand. Then she returns to the sea.</p><p>About two months later, the baby turtles hatch. They dig out of the sand and race toward the water. The trip is dangerous because birds and crabs try to catch them.</p><p>People can help sea turtles by keeping beaches clean and turning off bright lights near the shore at night. Bright lights can confuse baby turtles and lead them away from the ocean.</p>`
+  },
+  tests: [
+    { id:'story1', name:'Reading: Kites & Bees', blurb:'Two short stories, 13 questions', qs:[
+      ["Where does the story take place?",["at the beach","on Pine Hill","at school","in a city park"],1,"The first sentence says they climbed Pine Hill.","kite"],
+      ["What happened to the kite?",["It ripped in half.","Grandpa dropped it.","The string snapped and it floated away.","It fell in a lake."],2,"\"A strong gust snapped the string.\"","kite"],
+      ["How did Maya feel when the kite flew away?",["excited","sad","sleepy","angry at Grandpa"],1,"Her eyes filled with tears, so she was sad.","kite"],
+      ["Which clue tells you how Maya felt?",["\"Maya's eyes filled with tears.\"","\"Grandpa carried a thermos.\"","\"It was a windy Saturday.\"","\"The kite was red.\""],0,"Tears are a clue that someone is sad.","kite"],
+      ["How did they find the kite?",["A friend brought it back.","They saw its yellow tail in an apple tree.","It landed at their feet.","They bought a new one."],1,"They spotted a flash of yellow in an apple tree.","kite"],
+      ["What is the main idea of the story?",["Grandpa likes hot cocoa.","Kites should always be red.","Maya and Grandpa lose a kite and work together to find it.","Wind is dangerous."],2,"The main idea is what the whole story is mostly about.","kite"],
+      ["What kind of person is Grandpa?",["mean","kind and helpful","lazy","silly"],1,"He hugged Maya, helped look for the kite, and lifted her up.","kite"],
+      ["What is nectar?",["a wax room","a sweet liquid from flowers","a kind of bee","a seed"],1,"The article says nectar is a sweet liquid.","bees"],
+      ["How do bees turn nectar into honey?",["They freeze it.","They mix it with water.","They pass it around and fan it with their wings to dry it.","They bury it."],2,"Fanning dries the nectar and turns it into honey.","bees"],
+      ["Why do bees save honey?",["to sell it","to eat in winter when there are no flowers","to build the hive","to give to people"],1,"Honey is their food for winter.","bees"],
+      ["Why did the author write \"Busy Bees\"?",["to tell a funny story","to teach facts about how bees make honey","to make you scared of bees","to sell honey"],1,"It gives true facts, so it was written to teach.","bees"],
+      ["How do bees help plants?",["They water them.","They carry pollen so plants make seeds and fruit.","They eat the bugs.","They dig holes."],1,"Look at the last sentence of the article.","bees"],
+      ["How are the two stories different?",["Both are made-up stories.","\"The Kite on the Hill\" is made up, and \"Busy Bees\" gives true facts.","Both give true facts.","\"Busy Bees\" is about a girl."],1,"A made-up story is fiction. True facts are nonfiction.","bees"]
+    ]},
+    { id:'story2', name:'Reading: Soccer & Sea Turtles', blurb:'Two more stories, 12 questions', qs:[
+      ["\"His stomach felt full of butterflies\" means Carlos felt…",["hungry","nervous","sick from bugs","sleepy"],1,"\"Butterflies in your stomach\" is a way to say you feel nervous.","game"],
+      ["What problem did Carlos have in the first half?",["He lost his shoe.","He missed a kick and the other team scored.","He got hurt.","He was late."],1,"He missed, and then the other team scored.","game"],
+      ["How did Carlos feel after he missed?",["proud","disappointed in himself","excited","bored"],1,"He looked at his shoes and said \"I'm no good.\"","game"],
+      ["What did Coach Lee teach Carlos?",["Kick with your left foot.","Everybody misses, so keep trying.","Never play soccer.","Always be the goalie."],1,"She said what matters is to keep trying.","game"],
+      ["What is the lesson (theme) of the story?",["Soccer is the best sport.","Don't give up when things are hard.","Coaches are always right.","Winning is all that matters."],1,"Carlos almost gave up, but trying again helped him score.","game"],
+      ["What happened right after Carlos took a deep breath?",["He sat down.","He kicked the ball into the net.","The game ended.","He cried."],1,"Then he kicked and the ball went into the net.","game"],
+      ["How are sea turtles different from land turtles?",["They can't pull their heads and legs into their shells.","They have no shells.","They can fly.","They are much smaller."],0,"The first paragraph tells this difference.","turtles"],
+      ["What do flippers help sea turtles do?",["dig tunnels","swim long distances","climb trees","see at night"],1,"Strong flippers help them swim far.","turtles"],
+      ["Where does a mother sea turtle lay her eggs?",["in the ocean","in a hole on a sandy beach","in a tree","in a nest of sticks"],1,"She digs a hole in the sand.","turtles"],
+      ["Why is the trip to the water dangerous for baby turtles?",["The water is too cold.","Birds and crabs try to catch them.","The sand is too hot.","They are too slow to swim."],1,"Birds and crabs try to catch them.","turtles"],
+      ["Why should people turn off bright lights near beaches at night?",["to save money","Lights confuse baby turtles and lead them away from the ocean.","so people can sleep","Lights scare the crabs."],1,"The last paragraph explains this.","turtles"],
+      ["What is the main idea of \"Sea Turtles\"?",["Beaches are fun to visit.","Sea turtles live in the ocean, lay eggs on beaches, and need our help.","Crabs are dangerous.","Turtles are slow."],1,"The whole article tells about how sea turtles live and how to help them.","turtles"]
+    ]},
+    { id:'phonics', name:'Phonics & Spelling', blurb:'Spelling, word endings, sounds', qs:[
+      ["We went to the ___ to swim.",["beech","beach","beatch"],1,"The 'ea' team makes the long e sound: b-ea-ch."],
+      ["I ate a slice of ___.",["caik","cak","cake"],2,"Silent e at the end makes the a say its name."],
+      ["Please ___ for me.",["wait","wate","waite"],0,"'ai' makes the long a sound in the middle of a word."],
+      ["The ___ sang in the tree.",["burd","berd","bird"],2,"Bird is spelled with 'ir'."],
+      ["My dog likes to ___ on a bone.",["choo","chew","chue"],1,"'ew' makes the oo sound in chew."],
+      ["It snows in the ___.",["wintr","wintur","winter"],2,"Many words end in 'er': win-ter."],
+      ["hop + ing = ?",["hoping","hopping","hopeing"],1,"Short vowel + one consonant: double it. hop → hopping."],
+      ["bake + ed = ?",["bakeed","bakked","baked"],2,"Drop the silent e before adding -ed."],
+      ["puppy + es = ?",["puppys","puppies","puppyes"],1,"Change y to i, then add -es."],
+      ["run + er = ?",["runer","runner","runnr"],1,"Double the n: run → runner."],
+      ["Which word has the same vowel sound as boat?",["hot","snow","cow","book"],1,"boat and snow both have the long o sound."],
+      ["Which letter is silent in knee?",["k","n","e"],0,"In 'kn' words, the k is quiet."],
+      ["Which letter is silent in lamb?",["l","m","b"],2,"In 'mb' at the end of a word, the b is quiet."],
+      ["How many syllables are in butterfly?",["1","2","3","4"],2,"Clap it: but-ter-fly."],
+      ["Which word is spelled correctly?",["frend","freind","friend"],2,"Friend has 'ie' in the middle. A trick: \"a friend to the end.\""],
+      ["Which word is spelled correctly?",["becaus","because","becuz"],1,"be-cause."]
+    ]},
+    { id:'grammar', name:'Grammar & Writing', blurb:'Parts of speech, capitals, punctuation', qs:[
+      ["Which word is a noun (person, place, or thing)?",["jump","happy","teacher","quickly"],2,"A teacher is a person."],
+      ["Which word is the verb? \"The frog jumped into the pond.\"",["frog","jumped","pond","into"],1,"A verb is an action word. Jumped is what the frog did."],
+      ["Which word is the adjective? \"The fluffy cat slept on the rug.\"",["fluffy","cat","slept","rug"],0,"Fluffy describes the cat."],
+      ["Which word is an adverb? \"The turtle walked slowly.\"",["turtle","walked","slowly","the"],2,"Slowly tells HOW the turtle walked."],
+      ["Which sentence uses capital letters correctly?",["my friend sam lives in ohio.","My friend Sam lives in Ohio.","My Friend sam lives in ohio."],1,"Capitalize the first word, names, and places."],
+      ["Which end mark goes here? \"Where is my backpack__\"",[".","?","!"],1,"It asks something, so it needs a question mark."],
+      ["Which end mark goes here? \"Watch out for the bee__\"",[".","?","!"],2,"It shows strong feeling, so use an exclamation mark."],
+      ["What is the plural of child?",["childs","childes","children"],2,"Some plurals are special: one child, two children."],
+      ["What is the plural of mouse?",["mouses","mice","meese"],1,"One mouse, two mice."],
+      ["Yesterday, I ___ to the store.",["go","goes","went","going"],2,"'Yesterday' means past tense. The past of go is went."],
+      ["The dogs ___ very loud.",["is","are","was"],1,"More than one dog → are."],
+      ["Which sentence uses commas correctly?",["I like apples bananas, and grapes.","I like, apples, bananas and grapes.","I like apples, bananas, and grapes."],2,"Put a comma after each item in a list."],
+      ["Which is the correct way to write \"me and tom goed to the park\"?",["Me and Tom goed to the park.","Tom and I went to the park.","tom and me went to the park."],1,"Say 'Tom and I,' capitalize Tom, and use 'went.'"],
+      ["Join these: \"The sun is hot. The sun is bright.\"",["The sun is hot and bright.","The sun is hot the sun is bright.","Hot and bright the sun."],0,"Use 'and' to join the two describing words."],
+      ["Which is a complete sentence?",["Ran to the bus.","The big red dog.","Mom drove us to school."],2,"A complete sentence has a who (Mom) and an action (drove)."],
+      ["Which word is a pronoun that could replace \"Jake\"?",["she","he","it","they"],1,"Jake is one boy, so use he."]
+    ]},
+    { id:'vocab', name:'Vocabulary', blurb:'Context clues, synonyms, word parts', qs:[
+      ["\"The puppy was so tiny that it fit in my hand.\" Tiny means:",["loud","very small","fast","heavy"],1,"Fitting in a hand is the clue: it's very small."],
+      ["\"Leo was famished after soccer, so he ate two sandwiches.\" Famished means:",["very hungry","tired","happy","cold"],0,"Eating two sandwiches is the clue."],
+      ["\"The path was narrow, so we walked one at a time.\" Narrow means:",["long","muddy","not wide","bright"],2,"Walking one at a time means there wasn't much room."],
+      ["\"Mia was furious when her brother broke her toy. She stomped and yelled.\" Furious means:",["silly","very angry","scared","proud"],1,"Stomping and yelling show anger."],
+      ["\"The old bridge was fragile, so only one car could cross at a time.\" Fragile means:",["new","easy to break","very long","pretty"],1,"Only one car at a time means it could break."],
+      ["Which is a synonym (same meaning) for glad?",["sad","happy","mad","tired"],1,"Glad and happy mean the same."],
+      ["Which is a synonym for begin?",["start","stop","end","wait"],0,"Begin and start mean the same."],
+      ["Which is an antonym (opposite) for loud?",["noisy","big","quiet","fast"],2,"Quiet is the opposite of loud."],
+      ["Which is an antonym for early?",["soon","late","first","quick"],1,"Late is the opposite of early."],
+      ["\"The bat flew out of the dark cave.\" Bat means:",["a stick used in baseball","a flying animal"],1,"It flew out of a cave, so it's the animal."],
+      ["\"She wore a gold ring on her finger.\" Ring means:",["the sound a bell makes","a piece of jewelry"],1,"You wear jewelry on your finger."],
+      ["Un- means 'not.' What does unhappy mean?",["very happy","not happy","happy again"],1,"un + happy = not happy."],
+      ["Pre- means 'before.' What does preheat mean?",["heat before","heat again","not heat"],0,"pre + heat = heat before."],
+      ["-ful means 'full of.' What does careful mean?",["without care","full of care","care again"],1,"care + ful = full of care."],
+      ["Which is a compound word (two words put together)?",["running","sunflower","happy","jumped"],1,"sun + flower = sunflower."],
+      ["Enormous means 'very big.' Which sentence uses it correctly?",["The ant was enormous, so I could barely see it.","The elephant was enormous.","I was enormous sleepy."],1,"An elephant is very big."]
+    ]}
+  ]
+});

@@ -1,0 +1,104 @@
+// Math. Format: [question, [options], correctIndex, why]
+addSubject({
+  id: 'math', name: 'Math', icon: '🔢', color: '#e0702b',
+  tests: [
+    { id:'addsub', name:'Adding & Subtracting', blurb:'Numbers up to 1,000 and rounding', qs:[
+      ["345 + 232 = ?",["577","567","587","477"],0,"5+2=7 ones, 4+3=7 tens, 3+2=5 hundreds → 577."],
+      ["508 + 297 = ?",["795","805","815","705"],1,"8+7=15 (carry 1), 0+9+1=10 (carry 1), 5+2+1=8 → 805."],
+      ["600 − 245 = ?",["455","365","355","445"],2,"Check it: 355 + 245 = 600."],
+      ["482 − 156 = ?",["336","326","334","346"],1,"Borrow a ten: 12−6=6, 7−5=2, 4−1=3 → 326."],
+      ["Round 67 to the nearest ten.",["60","70","100","65"],1,"7 is 5 or more, so round up to 70."],
+      ["Round 342 to the nearest hundred.",["300","340","400","350"],0,"The tens digit is 4, which is less than 5, so round down to 300."],
+      ["Round 685 to the nearest ten.",["680","690","700","600"],1,"The ones digit is 5, so round up to 690."],
+      ["A school has 268 boys and 245 girls. How many kids in all?",["503","513","423","413"],1,"268 + 245 = 513."],
+      ["Ben had 500 stickers. He gave away 175. How many are left?",["335","425","325","375"],2,"500 − 175 = 325."],
+      ["Which is the best estimate for 198 + 403?",["500","600","700","400"],1,"198 is about 200 and 403 is about 400. 200 + 400 = 600."],
+      ["What is the value of the 7 in 472?",["7","70","700","47"],1,"The 7 is in the tens place, so it means 70."],
+      ["Which number is greater?",["589","598","559","509"],1,"All have 5 hundreds. 598 has the most tens (9)."]
+    ]},
+    { id:'mult', name:'Multiplication', blurb:'Times tables and groups', qs:[
+      ["3 × 4 = ?",["7","12","10","16"],1,"3 groups of 4 is 12."],
+      ["5 × 6 = ?",["30","25","35","11"],0,"Count by 5s six times: 5, 10, 15, 20, 25, 30."],
+      ["7 × 8 = ?",["54","48","56","64"],2,"7 × 8 = 56. Trick: 5, 6, 7, 8 → 56 = 7 × 8."],
+      ["9 × 3 = ?",["27","24","12","36"],0,"9 + 9 + 9 = 27."],
+      ["6 × 6 = ?",["12","30","36","42"],2,"6 groups of 6 is 36."],
+      ["4 × 0 = ?",["4","0","40","1"],1,"Any number times 0 is 0."],
+      ["8 × 5 = ?",["35","40","45","13"],1,"Count by 5s eight times to get 40."],
+      ["Which is the same as 5 + 5 + 5?",["5 × 5","3 × 5","5 + 3","15 × 3"],1,"Three 5s added together is 3 × 5."],
+      ["An array has 4 rows with 7 stars in each row. How many stars?",["11","24","28","32"],2,"4 × 7 = 28."],
+      ["There are 6 bags with 4 apples in each bag. How many apples?",["10","24","20","64"],1,"6 × 4 = 24."],
+      ["Which has the same answer as 2 × 9?",["9 × 2","2 + 9","9 − 2","2 × 2"],0,"You can switch the order when you multiply."],
+      ["10 × 7 = ?",["17","70","700","77"],1,"Times 10 adds a zero: 70."]
+    ]},
+    { id:'div', name:'Division', blurb:'Sharing equally and fact families', qs:[
+      ["12 ÷ 3 = ?",["4","3","9","36"],0,"12 shared into 3 equal groups is 4 each."],
+      ["20 ÷ 5 = ?",["15","4","5","25"],1,"5 × 4 = 20, so 20 ÷ 5 = 4."],
+      ["36 ÷ 6 = ?",["5","7","6","30"],2,"6 × 6 = 36."],
+      ["45 ÷ 9 = ?",["5","6","4","36"],0,"9 × 5 = 45."],
+      ["56 ÷ 7 = ?",["7","9","6","8"],3,"7 × 8 = 56."],
+      ["18 ÷ 2 = ?",["8","9","16","20"],1,"Half of 18 is 9."],
+      ["9 ÷ 1 = ?",["1","0","9","10"],2,"Any number divided by 1 stays the same."],
+      ["24 cookies are shared equally by 4 friends. How many does each friend get?",["4","6","8","20"],1,"24 ÷ 4 = 6."],
+      ["30 students make groups of 5. How many groups?",["5","6","25","35"],1,"30 ÷ 5 = 6."],
+      ["If 6 × 7 = 42, then 42 ÷ 7 = ?",["6","7","42","49"],0,"Multiplication and division are a fact family."],
+      ["Which division fact goes with 3 × 8 = 24?",["24 ÷ 8 = 3","24 ÷ 4 = 6","8 ÷ 3 = 24","24 − 8 = 16"],0,"Same three numbers: 3, 8, and 24."],
+      ["What is the missing number? 5 × ___ = 35",["5","6","7","30"],2,"5 × 7 = 35."]
+    ]},
+    { id:'frac', name:'Fractions', blurb:'Parts of a whole and comparing', qs:[
+      ["A pizza is cut into 4 equal slices. You eat 1 slice. What fraction did you eat?",["1/2","1/3","1/4","4/1"],2,"1 out of 4 equal parts is 1/4."],
+      ["A bar has 8 equal parts. 3 parts are shaded. What fraction is shaded?",["3/5","3/8","5/8","8/3"],1,"3 shaded out of 8 total → 3/8."],
+      ["Which fraction is bigger?",["1/2","1/4"],0,"Halves are bigger pieces than fourths."],
+      ["Which fraction is bigger?",["3/8","5/8"],1,"Same size pieces, and 5 pieces is more than 3."],
+      ["In 3/5, what is the top number (numerator)?",["3","5","8","2"],0,"The numerator is the top number."],
+      ["What does the bottom number (denominator) tell you?",["how many parts are shaded","how many equal parts the whole has","how big the shape is","how many wholes"],1,"The denominator tells how many equal parts make the whole."],
+      ["2/2 is the same as…",["1 whole","2 wholes","1/2","0"],0,"2 out of 2 parts is the whole thing."],
+      ["Which fraction is equal to 1/2?",["1/4","2/4","3/4","2/3"],1,"2 fourths cover the same amount as 1 half."],
+      ["A number line from 0 to 1 is split into 3 equal parts. What is the first mark after 0?",["1/2","1/4","1/3","3/1"],2,"Each part is one third."],
+      ["Which fraction is the smallest?",["1/2","1/3","1/6","1/4"],2,"When the whole is cut into more pieces, each piece is smaller."],
+      ["Sam ate 1/3 of a sandwich. Mia ate 1/3 of the same size sandwich. Who ate more?",["Sam","Mia","They ate the same"],2,"Same size sandwich and same fraction."],
+      ["A garden has 6 equal rows. 4 rows have carrots. What fraction has carrots?",["4/6","6/4","2/6","4/10"],0,"4 out of 6 rows → 4/6."]
+    ]},
+    { id:'timemoney', name:'Time, Money & Measuring', blurb:'Clocks, coins, and units', qs:[
+      ["The short hand is on 3 and the long hand is on 12. What time is it?",["12:03","3:00","3:12","12:15"],1,"Long hand on 12 means o'clock."],
+      ["What time is \"quarter past three\"?",["3:25","3:15","3:45","2:45"],1,"A quarter hour is 15 minutes, so 15 minutes after 3."],
+      ["How many minutes are in one hour?",["30","100","60","24"],2,"There are 60 minutes in an hour."],
+      ["It is 2:00. What time will it be in 45 minutes?",["2:45","3:45","2:15","3:00"],0,"Add 45 minutes to 2:00."],
+      ["Ana starts reading at 4:30 and stops at 5:10. How long did she read?",["30 minutes","40 minutes","50 minutes","1 hour"],1,"4:30 to 5:00 is 30 minutes, plus 10 more = 40 minutes."],
+      ["A movie starts at 6:30 and lasts 2 hours. When does it end?",["7:30","8:00","8:30","9:30"],2,"Two hours after 6:30 is 8:30."],
+      ["How much are 3 quarters worth?",["30¢","75¢","50¢","$3"],1,"25 + 25 + 25 = 75¢."],
+      ["How much are 2 dimes and 1 nickel?",["25¢","21¢","30¢","15¢"],0,"10 + 10 + 5 = 25¢."],
+      ["You have $1.00 and buy a snack for 65¢. How much change?",["45¢","25¢","35¢","65¢"],2,"100 − 65 = 35¢."],
+      ["What is the best unit to measure the length of a pencil?",["inches","miles","pounds","gallons"],0,"A pencil is short, so use inches."],
+      ["Which would you measure in liters?",["how long a desk is","how much water is in a bathtub","how heavy a dog is","how tall a tree is"],1,"Liters measure how much liquid something holds."],
+      ["Which is the heaviest?",["a feather","a pencil","a bowling ball","a sheet of paper"],2,"A bowling ball weighs the most."]
+    ]},
+    { id:'shapes', name:'Shapes, Area & Perimeter', blurb:'Shapes and measuring around and inside', qs:[
+      ["How many sides does a triangle have?",["2","3","4","5"],1,"Tri means three."],
+      ["A shape with 4 sides is called a…",["triangle","pentagon","quadrilateral","hexagon"],2,"Quad means four."],
+      ["Which shape is NOT a quadrilateral?",["square","rectangle","triangle","rhombus"],2,"A triangle has 3 sides, not 4."],
+      ["How many sides does a hexagon have?",["5","6","7","8"],1,"A hexagon has 6 sides, like a honeycomb cell."],
+      ["Which shape has 4 equal sides and 4 square corners?",["rectangle","square","triangle","circle"],1,"A square has all sides equal and all square corners."],
+      ["A rectangle is 5 units long and 3 units wide. What is its area?",["8 square units","15 square units","16 square units","53 square units"],1,"Area = length × width = 5 × 3 = 15."],
+      ["A rectangle is 5 units long and 3 units wide. What is its perimeter?",["8 units","15 units","16 units","10 units"],2,"Add all sides: 5 + 3 + 5 + 3 = 16."],
+      ["A square has sides of 4 inches. What is its perimeter?",["8 inches","12 inches","16 inches","4 inches"],2,"4 + 4 + 4 + 4 = 16."],
+      ["A square has sides of 4 inches. What is its area?",["8 square inches","16 square inches","12 square inches","44 square inches"],1,"4 × 4 = 16 square inches."],
+      ["Perimeter means…",["the distance around a shape","the space inside a shape","how heavy a shape is","how many corners it has"],0,"Perimeter is the distance all the way around."],
+      ["Area means…",["the distance around a shape","the space inside a shape","the number of sides","the tallest side"],1,"Area is how much space covers the inside."],
+      ["Which is shaped like a right angle (a square corner)?",["the corner of a book","a circle","the tip of a pencil","a rainbow"],0,"A book's corner is a square corner."]
+    ]},
+    { id:'word', name:'Word Problems', blurb:'Read it, think it, solve it', qs:[
+      ["Mia has 3 boxes of 8 crayons. She gives away 5 crayons. How many are left?",["16","19","24","29"],1,"3 × 8 = 24, then 24 − 5 = 19."],
+      ["Tickets cost $5 each. Dad buys 4 tickets and pays with $50. How much change?",["$20","$25","$30","$45"],2,"4 × $5 = $20, and $50 − $20 = $30."],
+      ["28 students make 4 equal teams. How many are on each team?",["6","7","8","24"],1,"28 ÷ 4 = 7."],
+      ["Jake read 45 pages on Monday and 38 on Tuesday. How many MORE pages on Monday?",["7","83","13","17"],0,"45 − 38 = 7."],
+      ["A farmer plants 6 rows of corn with 9 plants in each row. How many plants?",["15","45","54","63"],2,"6 × 9 = 54."],
+      ["Ava has 72¢. She buys a pencil for 25¢. How much is left?",["47¢","53¢","97¢","57¢"],0,"72 − 25 = 47."],
+      ["Each spider has 8 legs. How many legs do 5 spiders have?",["13","35","40","48"],2,"5 × 8 = 40."],
+      ["The class needs 100 cupcakes. They have 64. How many more do they need?",["46","36","164","34"],1,"100 − 64 = 36."],
+      ["Liam has 36 marbles. He shares them equally among 4 people. How many does each get?",["8","9","32","40"],1,"36 ÷ 4 = 9."],
+      ["A book has 120 pages. Zoe reads 30 pages a day. How many days to finish?",["3","4","5","90"],1,"30 + 30 + 30 + 30 = 120, so 4 days."],
+      ["There are 7 bikes. Each bike has 2 wheels. How many wheels?",["9","14","12","72"],1,"7 × 2 = 14."],
+      ["Noah had 250 points. He earned 125 more, then lost 50. How many points now?",["325","375","425","275"],0,"250 + 125 = 375, then 375 − 50 = 325."]
+    ]}
+  ]
+});
