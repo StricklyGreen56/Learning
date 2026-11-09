@@ -1,6 +1,6 @@
-# Let's Practice! (Kindergarten – 3rd grade)
+# Let's Practice! (Kindergarten – 5th grade)
 
-Family practice site: Reading, Math, Science, and Social Studies for K, 1st, 2nd, and 3rd grade.
+Family practice site: Reading, Math, Science, Social Studies, and Computer Skills for Kindergarten through 5th grade.
 Live site: https://stricklygreen56.github.io/Learning/
 
 ## How it works

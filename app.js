@@ -14,7 +14,9 @@ const GRADES = [
   { id:'K', name:'Kindergarten', short:'K' },
   { id:'1', name:'1st Grade', short:'1st' },
   { id:'2', name:'2nd Grade', short:'2nd' },
-  { id:'3', name:'3rd Grade', short:'3rd' }
+  { id:'3', name:'3rd Grade', short:'3rd' },
+  { id:'4', name:'4th Grade', short:'4th' },
+  { id:'5', name:'5th Grade', short:'5th' }
 ];
 const AVATARS = ['🦊','🐻','🐼','🐯','🦁','🐸','🐵','🦄','🐙','🦖','🐶','🐱','🐰','🐧','🦋','🚀','⚽','🎨'];
 const DEMO = new URLSearchParams(location.search).has('demo');
@@ -357,7 +359,7 @@ function keepOrder(opts){ return opts.every(o => /^[\d.?!$¢:\/ ]+$/.test(o)); }
 function startQuiz(s, testId){
   let qs, name;
   if (testId === 'mixed'){
-    qs = shuffle(s.tests.flatMap(t => t.qs.filter(q => !q[4]))).slice(0, 10);
+    qs = shuffle(s.tests.flatMap(t => t.qs.filter(q => s.lessons || !q[4]))).slice(0, 10);
     name = 'Mixed Practice';
   } else {
     const t = s.tests.find(x => x.id === testId);
@@ -381,11 +383,12 @@ function renderQ(){
   const z = st.quiz, {s, qs, i, name} = z, q = qs[i];
   const passage = q.p ? s.passages[q.p] : null;
   const fresh = passage && q.p !== (i > 0 ? qs[i-1].p : null);
+  const kind = s.lessons ? 'lesson' : 'story';
   screen(`
     <div class="bar"><button class="link" id="back">← ${esc(s.name)}</button><span class="num">${i+1} of ${qs.length}</span></div>
     <div class="prog"><i style="width:${(i/qs.length)*100}%"></i></div>
-    ${passage ? `<details class="passage" ${fresh?'open':''}><summary>${fresh?'Read the story':'Look back at the story'}</summary>
-      ${canSpeak?'<button class="say" id="sayp">🔊 Read story to me</button>':''}${passage}</details>` : ''}
+    ${passage ? `<details class="passage" ${fresh?'open':''}><summary>${fresh?`Read the ${kind}`:`Look back at the ${kind}`}</summary>
+      ${canSpeak?`<button class="say" id="sayp">🔊 Read ${kind} to me</button>`:''}${passage}</details>` : ''}
     <div class="q">
       <div class="qhead"><span class="num">${esc(name)}</span>${canSpeak?'<button class="say" id="sayq">🔊 Read to me</button>':''}</div>
       <div class="qtext">${esc(q.text)}</div>
