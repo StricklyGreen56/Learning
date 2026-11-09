@@ -19,7 +19,7 @@ const GRADES = [
 const AVATARS = ['🦊','🐻','🐼','🐯','🦁','🐸','🐵','🦄','🐙','🦖','🐶','🐱','🐰','🐧','🦋','🚀','⚽','🎨'];
 const DEMO = new URLSearchParams(location.search).has('demo');
 
-const st = { user:null, family:null, kids:[], kid:null, best:{}, grade:null, quiz:null, parentOk:false, parentKid:null };
+const st = { user:null, fam:null, device:null, family:null, kids:[], kid:null, best:{}, grade:null, quiz:null, parentOk:false, parentKid:null };
 
 /* ---------------- helpers ---------------- */
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -86,6 +86,7 @@ function makeFirebase(){
         throw e;
       }
     },
+    async signInAnon(){ const r = await auth.signInAnonymously(); return r.user; },
     async signOut(){ await auth.signOut(); }
   };
 }
@@ -106,14 +107,16 @@ function makeDemo(){
       return r;
     }
   };
-  let cb = null, user = local('demo-signed') ? { uid:'demo', displayName:'Demo Parent' } : null;
+  const saved = local('demo-signed');
+  let cb = null, user = saved === 'parent' ? { uid:'demo', displayName:'Demo Parent' } : saved ? { uid:saved, isAnonymous:true } : null;
   AUTH = {
     onChange(f){ cb = f; setTimeout(() => cb(user), 0); },
-    async signIn(){ local('demo-signed','1'); user = { uid:'demo', displayName:'Demo Parent' }; cb(user); },
+    async signIn(){ local('demo-signed','parent'); user = { uid:'demo', displayName:'Demo Parent' }; cb(user); },
+    async signInAnon(){ const id = 'dev-'+uid8(); local('demo-signed', id); user = { uid:id, isAnonymous:true }; cb(user); return user; },
     async signOut(){ local('demo-signed', null); user = null; cb(null); }
   };
 }
-const famPath = () => 'families/' + st.user.uid;
+const famPath = () => 'families/' + st.fam;
 const kidPath = id => famPath() + '/kids/' + id;
 
 /* ---------------- start ---------------- */
@@ -125,8 +128,9 @@ function boot(){
     else return screen(`<div class="center"><h1>Can't connect</h1><p class="sub">Check your internet connection and reload.</p></div>`);
   }catch(e){ return screen(`<div class="center"><h1>Can't connect</h1><p class="sub">Reload the page to try again.</p></div>`); }
   AUTH.onChange(async u => {
-    st.user = u; st.parentOk = false;
+    st.user = u; st.parentOk = false; st.device = null; st.fam = u ? u.uid : null;
     if (!u) return signInPage();
+    if (u.isAnonymous) return st.pairing ? null : deviceStart();
     try{
       st.family = await DB.get(famPath());
       await loadKids();
@@ -134,9 +138,6 @@ function boot(){
       return screen(`<div class="center"><h1>Couldn't load your family</h1><p class="sub">${esc(e && e.code === 'permission-denied' ? 'The database rules need to be published in Firebase.' : 'Check your internet connection and reload.')}</p><button class="btn ghost" id="out">Sign out</button></div>`), $('out').onclick = () => AUTH.signOut();
     }
     if (!st.family || !st.family.pinHash || !st.kids.length) return setupPage();
-    const last = local('kid:'+u.uid);
-    const k = st.kids.find(x => x.id === last);
-    if (k && st.kids.length === 1) return pickKid(k);
     whoPage();
   });
 }
@@ -151,11 +152,15 @@ function signInPage(){
     <div class="center">
       <div class="big">📚</div>
       <h1>Let's Practice!</h1>
-      <p class="sub">A grown-up signs in once on this device. Then each kid picks their name and starts practicing.</p>
-      <button class="btn google" id="g">Sign in with Google</button>
+      ${st.notice ? `<p class="card warn">${esc(st.notice)}</p>` : ''}
+      <button class="btn" id="kidcode">I'm a kid: enter my setup code</button>
+      <p class="note">A grown-up gets the code from their Grown-ups page. You only type it once on this device.</p>
+      <div class="or">or</div>
+      <button class="btn google" id="g">Grown-up: sign in with Google</button>
       <p class="err" id="err"></p>
-      <p class="note">Only you can see your kids' scores.</p>
     </div>`);
+  st.notice = '';
+  $('kidcode').onclick = () => codePage();
   $('g').onclick = async () => {
     $('err').textContent = '';
     try{ await AUTH.signIn(); }
@@ -218,6 +223,9 @@ function kidForm(kid, back){
       <div class="chips" id="grades">${GRADES.map(g => `<button class="chip ${g.id===k.grade?'on':''}" data-g="${g.id}">${g.name}</button>`).join('')}</div>
       <label class="lbl">Picture</label>
       <div class="avatars" id="avs">${AVATARS.map(a => `<button class="avbtn ${a===avatar?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>
+      <label class="lbl">${esc(k.name || 'Kid')}'s secret PIN</label>
+      <p class="note">4 numbers this kid types to open their profile on a shared device, so brothers and sisters can't get in. Linked devices don't ask for it.${kid && kid.pinHash ? ' Leave blank to keep the current PIN.' : ''}</p>
+      <input class="pin" type="password" id="kpin" inputmode="numeric" maxlength="4" placeholder="${kid && kid.pinHash ? 'Keep current' : '4 digits'}" autocomplete="off">
       <label class="check"><input type="checkbox" id="ra" ${k.readAloud?'checked':''}> Read questions out loud automatically <span class="note">(great for kids still learning to read)</span></label>
     </div>
     <p class="err" id="err"></p>
@@ -230,7 +238,11 @@ function kidForm(kid, back){
   $('save').onclick = async () => {
     const name = $('name').value.trim().slice(0,20);
     if (!name) return $('err').textContent = 'Type a name.';
-    const data = { name, grade, avatar, readAloud: $('ra').checked, at: kid ? (kid.at || Date.now()) : Date.now() };
+    const kp = $('kpin').value.trim();
+    if (kp && !/^\d{4}$/.test(kp)) return $('err').textContent = 'The kid PIN needs to be 4 numbers.';
+    if (!kp && !(kid && kid.pinHash)) return $('err').textContent = 'Give ' + name + ' a 4-number PIN.';
+    if (kp && st.family && st.family.pinHash && await hashPin(kp) === st.family.pinHash) return $('err').textContent = 'Use a different PIN than your grown-up PIN.';
+    const data = { name, grade, avatar, readAloud: $('ra').checked, at: kid ? (kid.at || Date.now()) : Date.now(), pinHash: kp ? await hashPin('kid:'+kp) : kid.pinHash };
     try{
       await DB.set(kidPath(kid ? kid.id : uid8()), data);
       await loadKids();
@@ -243,6 +255,7 @@ function kidForm(kid, back){
     $('yes').onclick = async () => {
       try{
         for (const sub of ['best','attempts']) for (const d of await DB.list(kidPath(kid.id)+'/'+sub)) await DB.del(kidPath(kid.id)+'/'+sub+'/'+d.id);
+        for (const d of await DB.list(famPath()+'/devices')) if (d.kid === kid.id) await DB.del(famPath()+'/devices/'+d.id);
         await DB.del(kidPath(kid.id));
         await loadKids();
         if (st.kid && st.kid.id === kid.id) st.kid = null;
@@ -260,13 +273,36 @@ function whoPage(){
     <h1>Who's practicing?</h1>
     <div class="who">${st.kids.map(k => `<button class="kidbtn" data-id="${k.id}"><span class="av">${k.avatar}</span><b>${esc(k.name)}</b><span>${gradeName(k.grade)}</span></button>`).join('')}</div>
     <div class="parent"><button class="link" id="par">🔒 Grown-ups</button></div>`);
-  app.querySelectorAll('.kidbtn').forEach(b => b.onclick = () => pickKid(st.kids.find(k => k.id === b.dataset.id)));
+  app.querySelectorAll('.kidbtn').forEach(b => b.onclick = () => kidPinPage(st.kids.find(k => k.id === b.dataset.id)));
   $('par').onclick = () => parentGate();
+}
+
+// On a shared (grown-up signed-in) device, each kid types their own PIN so siblings can't open each other's profile.
+function kidPinPage(k){
+  if (!k.pinHash) return pickKid(k);
+  setColor();
+  screen(`
+    <div class="bar"><button class="link" id="back">← Back</button></div>
+    <div class="center">
+      <div class="big">${k.avatar}</div>
+      <h1>Hi, ${esc(k.name)}!</h1>
+      <p class="sub">Type your secret PIN.</p>
+      <input class="pin" type="password" id="pin" inputmode="numeric" maxlength="4" autocomplete="off">
+      <p class="err" id="err"></p>
+      <button class="btn" id="go">Go</button>
+    </div>`);
+  $('back').onclick = whoPage;
+  const go = async () => {
+    if (await hashPin('kid:'+$('pin').value.trim()) === k.pinHash) pickKid(k);
+    else { $('err').textContent = 'That PIN isn\'t right. Try again!'; $('pin').value = ''; }
+  };
+  $('go').onclick = go;
+  $('pin').onkeydown = e => { if (e.key === 'Enter') go(); };
+  $('pin').focus();
 }
 
 async function pickKid(k){
   st.kid = k; st.grade = k.grade; st.best = {};
-  local('kid:'+st.user.uid, k.id);
   try{ (await DB.list(kidPath(k.id)+'/best')).forEach(b => st.best[b.id] = b); }catch(e){}
   kidHome();
 }
@@ -275,7 +311,7 @@ function kidHome(){
   const k = st.kid; setColor();
   const subs = subjectsFor(st.grade);
   screen(`
-    <div class="bar"><button class="link" id="switch">← Not ${esc(k.name)}?</button><span class="gradetag">${gradeName(st.grade)}</span></div>
+    <div class="bar">${st.device ? `<button class="link" id="switch">🔒 Grown-ups</button>` : `<button class="link" id="switch">← Not ${esc(k.name)}?</button>`}<span class="gradetag">${gradeName(st.grade)}</span></div>
     <h1>Hi, ${esc(k.name)}! ${k.avatar}</h1>
     <p class="sub">Pick a subject.</p>
     <div class="grid">${subs.map(s => {
@@ -289,7 +325,7 @@ function kidHome(){
       <p class="note">Want it easier or harder? Try another grade:</p>
       <div class="chips">${GRADES.map(g => `<button class="chip ${g.id===st.grade?'on':''}" data-g="${g.id}">${g.name}</button>`).join('')}</div>
     </div>`);
-  $('switch').onclick = () => whoPage();
+  $('switch').onclick = () => st.device ? deviceGate() : whoPage();
   app.querySelectorAll('.subject').forEach(b => b.onclick = () => subjectPage(subs.find(s => s.id === b.dataset.id)));
   app.querySelectorAll('.othergrades .chip').forEach(b => b.onclick = () => { st.grade = b.dataset.g; kidHome(); });
 }
@@ -411,6 +447,150 @@ async function done(){
   }catch(e){ if ($('saved')) $('saved').textContent = 'Saved on this device. It will sync when you\'re back online.'; }
 }
 
+/* ---------------- linked kid devices (no email) ----------------
+   A grown-up makes a one-time code. The kid's device signs in anonymously, uses the code to link itself
+   to ONE kid (families/{uid}/devices/{device uid}), and remembers it. Firestore rules only let that
+   device read and save that one kid's scores. */
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function newCode(){ let c = ''; const r = crypto.getRandomValues(new Uint32Array(6)); for (const n of r) c += CODE_CHARS[n % CODE_CHARS.length]; return c; }
+function deviceLabel(){
+  const u = navigator.userAgent;
+  const kind = /iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1) ? 'iPad' : /iPhone/.test(u) ? 'iPhone' : /Android/.test(u) ? (/Mobile/.test(u) ? 'Android phone' : 'Android tablet') : /CrOS/.test(u) ? 'Chromebook' : /Windows/.test(u) ? 'Windows PC' : /Mac/.test(u) ? 'Mac' : /Linux/.test(u) ? 'Computer' : 'Device';
+  const br = /Edg\//.test(u) ? 'Edge' : /CriOS|Chrome\//.test(u) ? 'Chrome' : /FxiOS|Firefox\//.test(u) ? 'Firefox' : /Safari\//.test(u) ? 'Safari' : '';
+  return kind + (br ? ' · ' + br : '');
+}
+
+async function deviceStart(){
+  let pair = null; try{ pair = JSON.parse(local('pair') || 'null'); }catch(e){}
+  if (!pair) return codePage();
+  st.fam = pair.fam; st.device = pair;
+  try{
+    const dev = await DB.get(famPath()+'/devices/'+st.user.uid);
+    if (!dev) throw { code:'unlinked' };
+    const kid = await DB.get(kidPath(pair.kid));
+    if (!kid) throw { code:'unlinked' };
+    st.family = await DB.get(famPath());
+    st.kids = [{ id:pair.kid, ...kid }];
+  }catch(e){
+    if (e && (e.code === 'unlinked' || e.code === 'permission-denied')){
+      local('pair', null); st.notice = 'This device was unlinked. Ask a grown-up for a new code.';
+      return AUTH.signOut();
+    }
+    return screen(`<div class="center"><h1>Can't connect</h1><p class="sub">Check your internet connection and reload.</p></div>`);
+  }
+  pickKid(st.kids[0]);
+}
+
+function codePage(){
+  setColor();
+  screen(`
+    <div class="bar"><button class="link" id="back">← Back</button></div>
+    <div class="center">
+      <div class="big">🔑</div>
+      <h1>Enter your setup code</h1>
+      <p class="sub">Ask a grown-up for the code. You only need it once on this device.</p>
+      <input class="pin code" id="code" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC123">
+      <p class="err" id="err"></p>
+      <button class="btn" id="go">Go</button>
+    </div>`);
+  $('back').onclick = async () => { if (st.user && st.user.isAnonymous){ st.pairing = true; await AUTH.signOut(); st.pairing = false; } signInPage(); };
+  const go = async () => {
+    const code = $('code').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (code.length !== 6) return $('err').textContent = 'The code has 6 letters and numbers.';
+    $('go').disabled = true; $('err').textContent = '';
+    try{
+      st.pairing = true;
+      if (!st.user || !st.user.isAnonymous) st.user = await AUTH.signInAnon();
+      const pc = await DB.get('pairCodes/'+code);
+      if (!pc || pc.exp < Date.now()) throw { code:'bad-code' };
+      await DB.set('families/'+pc.parent+'/devices/'+st.user.uid, { kid:pc.kid, code, at:Date.now(), name:deviceLabel() });
+      try{ await DB.del('pairCodes/'+code); }catch(e){}
+      local('pair', JSON.stringify({ fam:pc.parent, kid:pc.kid }));
+      st.pairing = false;
+      deviceStart();
+    }catch(e){
+      st.pairing = false; $('go').disabled = false;
+      $('err').textContent = e && e.code === 'bad-code' ? 'That code didn\'t work. It may be old. Ask for a new one.'
+        : e && /admin-restricted|operation-not-allowed/.test(e.code || '') ? 'Kid sign-in isn\'t turned on yet in Firebase (Anonymous).'
+        : 'Couldn\'t connect. Check the internet and try again.';
+    }
+  };
+  $('go').onclick = go;
+  $('code').onkeydown = e => { if (e.key === 'Enter') go(); };
+  $('code').focus();
+}
+
+function deviceGate(){
+  setColor();
+  screen(`
+    <div class="bar"><button class="link" id="back">← Back</button></div>
+    <div class="center">
+      <h1>🔒 Grown-ups only</h1>
+      <p class="sub">Enter your grown-up PIN.</p>
+      <input class="pin" type="password" id="pin" inputmode="numeric" maxlength="4" autocomplete="off">
+      <p class="err" id="err"></p>
+      <button class="btn" id="go">Open</button>
+      <div id="menu"></div>
+    </div>`);
+  $('back').onclick = kidHome;
+  const go = async () => {
+    if (!st.family || await hashPin($('pin').value.trim()) !== st.family.pinHash){ $('err').textContent = 'That PIN isn\'t right.'; $('pin').value = ''; return; }
+    $('err').textContent = '';
+    $('menu').innerHTML = `<p class="sub">This device is linked to <b>${esc(st.kid.name)}</b>. To see scores, open the Grown-ups page on your own phone.</p>
+      <button class="btn ghost danger" id="unlink">Unlink this device</button>`;
+    $('unlink').onclick = async () => {
+      try{ await DB.del(famPath()+'/devices/'+st.user.uid); }catch(e){}
+      local('pair', null); st.notice = 'Device unlinked.'; AUTH.signOut();
+    };
+  };
+  $('go').onclick = go;
+  $('pin').onkeydown = e => { if (e.key === 'Enter') go(); };
+  $('pin').focus();
+}
+
+async function linkCodePage(kid){
+  setColor();
+  screen(`<div class="center"><p>Making a code…</p></div>`);
+  let code;
+  try{
+    code = newCode();
+    await DB.set('pairCodes/'+code, { parent:st.user.uid, kid:kid.id, exp:Date.now() + 30*60*1000 });
+  }catch(e){
+    return screen(`<div class="center"><h1>Couldn't make a code</h1><p class="sub">Check your connection and try again.</p><button class="btn" id="back">Back</button></div>`), $('back').onclick = parentHome;
+  }
+  const url = location.origin + location.pathname;
+  screen(`
+    <div class="bar"><button class="link" id="back">← Back</button></div>
+    <div class="center">
+      <h1>Link ${esc(kid.name)}'s device</h1>
+      <div class="bigcode">${code}</div>
+      <ol class="steps">
+        <li>On ${esc(kid.name)}'s tablet or PC, open <b>${esc(url.replace(/^https?:\/\//,''))}</b></li>
+        <li>Tap <b>I'm a kid: enter my setup code</b></li>
+        <li>Type the code above</li>
+      </ol>
+      <p class="note">The code works once and runs out in 30 minutes. After that, the device opens straight to ${esc(kid.name)}'s page and can only see ${esc(kid.name)}'s tests and scores.</p>
+      <button class="btn" id="done">Done</button>
+    </div>`);
+  $('back').onclick = parentHome; $('done').onclick = parentHome;
+}
+
+async function loadDevices(){
+  const box = $('devs'); if (!box) return;
+  let devs = [];
+  try{ devs = (await DB.list(famPath()+'/devices')).sort((a,b) => (b.at||0) - (a.at||0)); }
+  catch(e){ box.innerHTML = '<p class="err">Couldn\'t load devices.</p>'; return; }
+  if (!$('devs')) return;
+  box.innerHTML = devs.length ? `<div class="card">${devs.map(d => { const k = st.kids.find(x => x.id === d.kid);
+      return `<div class="row"><span class="kidline"><span class="av">${k ? k.avatar : '❔'}</span><span><b>${esc(k ? k.name : 'Removed kid')}</b> · ${esc(d.name || 'Device')}<br><small class="note">Linked ${shortDate(d.at)}</small></span></span><button class="link danger-text" data-dev="${d.id}">Remove</button></div>`; }).join('')}</div>`
+    : '<p class="note">No linked devices yet. Use "Link a device" to set one up.</p>';
+  box.querySelectorAll('[data-dev]').forEach(b => b.onclick = async () => {
+    if (b.dataset.sure !== '1'){ b.dataset.sure = '1'; b.textContent = 'Tap again to remove'; return; }
+    try{ await DB.del(famPath()+'/devices/'+b.dataset.dev); }catch(e){}
+    loadDevices();
+  });
+}
+
 /* ---------------- grown-up side ---------------- */
 function parentGate(){
   setColor();
@@ -443,10 +623,14 @@ async function parentHome(){
     <div class="bar"><button class="link" id="back">← Kids</button><button class="link" id="lock">Lock</button></div>
     <h1>Scores</h1>
     <div class="chips kidtabs">${st.kids.map(k => `<button class="chip ${k.id===kid.id?'on':''}" data-id="${k.id}">${k.avatar} ${esc(k.name)}</button>`).join('')}</div>
+    ${kid.pinHash ? '' : `<div class="card warn"><b>${esc(kid.name)} has no PIN yet.</b> Any kid on a shared device can open this profile. <button class="link" id="setpin">Set one</button></div>`}
     <div id="body"><p class="note">Loading ${esc(kid.name)}'s scores…</p></div>
+    <h2>Linked devices</h2>
+    <div id="devs"><p class="note">Loading…</p></div>
     <h2>Settings</h2>
     <div class="list">
-      <button class="tile" id="edit"><div><b>Edit ${esc(kid.name)}</b><span>Name, grade, picture, read-aloud</span></div></button>
+      <button class="tile" id="link"><div><b>Link a device to ${esc(kid.name)}</b><span>Get a code so ${esc(kid.name)} can practice on their own tablet or PC with no sign-in</span></div></button>
+      <button class="tile" id="edit"><div><b>Edit ${esc(kid.name)}</b><span>Name, grade, picture, PIN, read-aloud</span></div></button>
       <button class="tile" id="add"><div><b>+ Add a kid</b><span>Each kid gets their own scores</span></div></button>
       <button class="tile" id="pinc"><div><b>Change PIN</b><span>The PIN that opens this page</span></div></button>
       <button class="tile" id="out"><div><b>Sign out</b><span>Signed in as ${esc(st.user.displayName || st.user.email || '')}</span></div></button>
@@ -455,9 +639,12 @@ async function parentHome(){
   $('lock').onclick = () => { st.parentOk = false; whoPage(); };
   app.querySelectorAll('.kidtabs .chip').forEach(b => b.onclick = () => { st.parentKid = b.dataset.id; parentHome(); });
   $('edit').onclick = () => kidForm(kid, parentHome);
+  if ($('setpin')) $('setpin').onclick = () => kidForm(kid, parentHome);
+  $('link').onclick = () => linkCodePage(kid);
+  loadDevices();
   $('add').onclick = () => kidForm(null, parentHome);
   $('pinc').onclick = changePin;
-  $('out').onclick = () => { local('kid:'+st.user.uid, null); AUTH.signOut(); };
+  $('out').onclick = () => AUTH.signOut();
 
   let best = [], attempts = [];
   try{

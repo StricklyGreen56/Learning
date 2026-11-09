@@ -2,10 +2,52 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Each parent's kids, PIN and scores live under families/{their uid}.
-    // Only that parent's signed-in Google account can read or write them.
+    function signedIn() { return request.auth != null; }
+    function isParent(uid) { return signedIn() && request.auth.uid == uid; }
+    function devPath(uid) { return /databases/$(database)/documents/families/$(uid)/devices/$(request.auth.uid); }
+    // A linked kid device: signed in (no email) and listed under this family's devices.
+    function isDevice(uid) { return signedIn() && exists(devPath(uid)); }
+    // A linked device may only touch the ONE kid it was linked to.
+    function deviceFor(uid, kid) { return isDevice(uid) && get(devPath(uid)).data.kid == kid; }
+
+    // The parent can do anything in their own family.
     match /families/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if isParent(uid);
+    }
+
+    // Family settings: a linked device can read them (to check the grown-up PIN on that device).
+    match /families/{uid} {
+      allow get: if isDevice(uid);
+    }
+
+    // A linked device can read only its own kid's profile.
+    match /families/{uid}/kids/{kid} {
+      allow get: if deviceFor(uid, kid);
+    }
+
+    // ...and read and save only its own kid's scores (no deleting).
+    match /families/{uid}/kids/{kid}/{sub}/{doc} {
+      allow read, create, update: if deviceFor(uid, kid) && (sub == 'best' || sub == 'attempts');
+    }
+
+    // Linking a device: allowed only with a valid, unexpired code the parent made for that kid.
+    match /families/{uid}/devices/{dev} {
+      allow get, delete: if signedIn() && request.auth.uid == dev;
+      allow create: if signedIn() && request.auth.uid == dev
+        && request.resource.data.keys().hasOnly(['kid', 'code', 'at', 'name'])
+        && exists(/databases/$(database)/documents/pairCodes/$(request.resource.data.code))
+        && get(/databases/$(database)/documents/pairCodes/$(request.resource.data.code)).data.parent == uid
+        && get(/databases/$(database)/documents/pairCodes/$(request.resource.data.code)).data.kid == request.resource.data.kid
+        && get(/databases/$(database)/documents/pairCodes/$(request.resource.data.code)).data.exp > request.time.toMillis();
+    }
+
+    // One-time link codes. Anyone signed in can look up a code they know (not list them).
+    match /pairCodes/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn() && request.resource.data.parent == request.auth.uid
+        && request.resource.data.keys().hasOnly(['parent', 'kid', 'exp']);
+      allow delete: if signedIn() && (resource.data.parent == request.auth.uid
+        || exists(/databases/$(database)/documents/families/$(resource.data.parent)/devices/$(request.auth.uid)));
     }
 
     // Everything else is closed.

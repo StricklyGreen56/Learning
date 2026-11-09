@@ -4,13 +4,15 @@ Family practice site: Reading, Math, Science, and Social Studies for K, 1st, 2nd
 Live site: https://stricklygreen56.github.io/Learning/
 
 ## How it works
-- A parent signs in with Google once on each device.
-- Each kid picks their profile ("Who's practicing?") and gets their grade's tests. They can also try other grades.
+- **Kids' own devices (no email):** on the Grown-ups page, tap **Link a device** to get a 6-character code. On the kid's
+  tablet/PC, tap **I'm a kid: enter my setup code** and type it once. That device remembers and opens straight to that kid.
+  Firestore rules only let a linked device see and save that one kid's scores. Remove devices from the Grown-ups page.
+- **Shared device:** a parent signs in with Google; each kid picks their profile and types their own 4-digit kid PIN.
 - Scores save to Firebase under the parent's account, so the **🔒 Grown-ups** page (PIN protected) shows every kid's scores from any device: best scores, what needs practice, and recent tests with the questions they missed.
 - 🔊 **Read to me** reads questions aloud. Turn on automatic read-aloud per kid for early readers.
 
 ## Firebase
-Uses its own Firebase project (`learning-1be34`, free Spark plan). Data lives under `families/{parent uid}`.
+Uses its own Firebase project (`learning-1be34`, free Spark plan). Sign-in providers: Google (parents) and Anonymous (linked kid devices). Data lives under `families/{parent uid}`.
 If `firestore.rules` changes, paste it into Firebase Console → Firestore Database → Rules → Publish.
 
 Test without Firebase: add `?demo` to the URL (saves to the browser only).

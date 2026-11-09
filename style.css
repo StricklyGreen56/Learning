@@ -116,3 +116,10 @@ table th:first-child{font-size:16px}
 
 .pin::placeholder{letter-spacing:normal}
 .kidline{display:flex;align-items:center;gap:8px}
+.or{color:var(--muted);margin:16px 0 4px;font-weight:700}
+.warn{background:#fff6e0;border-color:#f2d58a}
+.code{letter-spacing:6px;text-transform:uppercase}
+.bigcode{font-size:44px;font-weight:800;letter-spacing:8px;background:#fff;border:3px dashed var(--accent);border-radius:18px;padding:14px;margin:16px auto;max-width:340px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.steps{text-align:left;max-width:440px;margin:0 auto 12px;padding-left:22px}
+.steps li{margin:6px 0}
+.danger-text{color:var(--bad)}
