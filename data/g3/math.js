@@ -2,6 +2,63 @@
 addSubject({ grade: '3',
   id: 'math', name: 'Math', icon: '🔢', color: '#e0702b',
   tests: [
+    // ---- Matches the class's Unit 3: Wrapping Up Addition and Subtraction Within 1,000 ----
+    { id:'u3add', name:'Unit 3A: Add within 1,000', blurb:'Expanded form and partial sums', qs:[
+      ["Write 457 in expanded form.",["400 + 50 + 7","4 + 5 + 7","400 + 5 + 7","40 + 50 + 7"],0,"4 hundreds, 5 tens, 7 ones."],
+      ["245 + 132. Hundreds: 200 + 100 = 300. Tens: 40 + 30 = 70. Ones: 5 + 2 = 7. What is the total?",["377","367","477","387"],0,"300 + 70 + 7 = 377."],
+      ["Partial sums for 276 + 158: ones 6 + 8 = 14, tens 70 + 50 = 120, hundreds 200 + 100 = 300. What is the total?",["434","334","424","444"],0,"14 + 120 + 300 = 434."],
+      ["300 + 60 + 2 plus 300 + 50 + 4 makes 600 + 110 + 6. What number is that?",["716","61106","706","616"],0,"600 + 110 + 6 = 716."],
+      ["What number is 600 + 130 + 15?",["745","735","6,130","645"],0,"600 + 130 = 730, plus 15 = 745."],
+      ["293 + 592 = ?",["885","875","785","895"],0,"200 + 500 = 700, 90 + 90 = 180, 3 + 2 = 5. 700 + 180 + 5 = 885."],
+      ["468 + 275 = ?",["743","733","643","753"],0,"400 + 200 = 600, 60 + 70 = 130, 8 + 5 = 13. 600 + 130 + 13 = 743."],
+      ["509 + 386 = ?",["895","885","995","795"],0,"500 + 300 = 800, 0 + 80 = 80, 9 + 6 = 15. 800 + 80 + 15 = 895."],
+      ["In 58 + 67, the ones make 8 + 7 = 15. What do you do with the 10 from 15?",["Regroup it as 1 ten in the tens place.","Throw it away.","Put it in the hundreds place.","Write 15 in the ones place."],0,"10 ones = 1 ten, so it moves to the tens place."],
+      ["A library has 347 fiction books and 286 nonfiction books. How many books in all?",["633","533","623","643"],0,"300 + 200 = 500, 40 + 80 = 120, 7 + 6 = 13. 500 + 120 + 13 = 633."],
+      ["Which is the best estimate for 389 + 412?",["600","700","800","900"],2,"389 is about 400 and 412 is about 400. 400 + 400 = 800."],
+      ["Does 293 + 592 = 785 make sense?",["No. 200 + 500 is already 700, and 90 + 90 adds 180 more, so it must be more than 800.","Yes, it is correct."],0,"Checking with place value shows the answer is too small. (It's 885.)"]
+    ]},
+    { id:'u3sub', name:'Unit 3B: Subtract within 1,000', blurb:'Expanded form and regrouping', qs:[
+      ["645 − 323 = ?",["322","312","422","332"],0,"600 − 300 = 300, 40 − 20 = 20, 5 − 3 = 2. No regrouping needed."],
+      ["528 − 271. You need more tens, so 500 + 20 + 8 becomes 400 + 120 + 8. Now subtract 200 + 70 + 1. What do you get?",["257","357","253","347"],0,"400 − 200 = 200, 120 − 70 = 50, 8 − 1 = 7. 200 + 50 + 7 = 257."],
+      ["In 452 − 117, you can't take 7 ones from 2 ones. What do you do?",["Trade 1 ten for 10 ones, so you have 12 ones.","Take 2 from 7 instead.","Skip the ones.","Add 7 instead."],0,"452 becomes 4 hundreds, 4 tens, and 12 ones."],
+      ["Which is the same as 300 + 40 + 6 after trading 1 hundred for 10 tens?",["200 + 140 + 6","300 + 140 + 6","200 + 40 + 16","400 + 40 + 6"],0,"1 hundred = 10 tens, so 300 becomes 200 and 40 becomes 140."],
+      ["728 − 384 = ?",["344","444","354","356"],0,"700 + 20 + 8 becomes 600 + 120 + 8. Then 600 − 300 = 300, 120 − 80 = 40, 8 − 4 = 4."],
+      ["803 − 457 = ?",["346","356","446","454"],0,"Check it: 346 + 457 = 803."],
+      ["600 − 238 = ?",["362","372","462","438"],0,"Check it: 362 + 238 = 600."],
+      ["914 − 625 = ?",["289","299","389","311"],0,"Check it: 289 + 625 = 914."],
+      ["How can you check that 731 − 286 = 445?",["Add 445 + 286 and see if you get 731.","Subtract 445 − 286.","Add 731 + 445.","You can't check it."],0,"Adding back the part you took away should give the starting number."],
+      ["A school had 500 tickets. It sold 368. How many tickets are left?",["132","232","142","868"],0,"500 − 368 = 132. Check: 132 + 368 = 500."],
+      ["Does 562 − 189 = 473 make sense?",["No. 562 − 200 is only 362, so the answer must be close to 373.","Yes, it is correct."],0,"Estimate first. The real answer is 373."],
+      ["In the standard algorithm for 528 − 271, why is a small 12 written above the tens place?",["A hundred was traded, making 12 tens.","It is a mistake.","It means add 1.","It means 1 hundred."],0,"Regrouping 1 hundred makes 10 more tens."]
+    ]},
+    { id:'u3round', name:'Unit 3C: Rounding within 1,000', blurb:'Nearest ten and hundred with number lines', qs:[
+      ["Round 364 to the nearest ten.",["360","370","300","400"],0,"364 is between 360 and 370, and closer to 360."],
+      ["Round 364 to the nearest hundred.",["300","400","360","370"],1,"364 is between 300 and 400, and closer to 400."],
+      ["On a number line from 300 to 400, what number is exactly halfway?",["350","340","360","325"],0,"Halfway between 300 and 400 is 350."],
+      ["Round 47 to the nearest ten.",["40","50","45","100"],1,"47 is closer to 50."],
+      ["Round 85 to the nearest ten.",["80","90","100","85"],1,"When the ones digit is 5, round up."],
+      ["Round 732 to the nearest hundred.",["700","800","730","740"],0,"732 is between 700 and 800, and closer to 700."],
+      ["Round 650 to the nearest hundred.",["600","700","650","660"],1,"650 is exactly halfway, so round up."],
+      ["Which number rounds to 500 when rounding to the nearest hundred?",["449","462","551","389"],1,"462 is between 400 and 500, and past the halfway point of 450."],
+      ["Which number rounds to 80 when rounding to the nearest ten?",["74","78","85","89"],1,"78 is between 70 and 80, and closer to 80."],
+      ["Round 996 to the nearest ten.",["990","1,000","900","1,010"],1,"996 is between 990 and 1,000, and closer to 1,000."],
+      ["293 + 592 = 885. Round 885 to the nearest hundred.",["800","900","880","890"],1,"885 is past 850, so it rounds up to 900."],
+      ["Round 728 − 384 = 344 to the nearest ten.",["340","350","300","400"],0,"344 is closer to 340."]
+    ]},
+    { id:'u3two', name:'Unit 3D: Two-Step Problems', blurb:'Problems that need two steps', qs:[
+      ["Leo had 130 cards. He bought 4 packs and now has 162. How many cards were in each pack?",["8","32","4","292"],0,"Step 1: 162 − 130 = 32 new cards. Step 2: 32 ÷ 4 = 8 in each pack."],
+      ["A class has 3 tables with 6 students at each, plus 5 students on the rug. How many students?",["14","18","23","90"],2,"Step 1: 3 × 6 = 18. Step 2: 18 + 5 = 23."],
+      ["Sam had 450 points. He lost 125, then won 230. How many points does he have now?",["555","345","805","325"],0,"Step 1: 450 − 125 = 325. Step 2: 325 + 230 = 555."],
+      ["There are 8 boxes with 5 apples each. 12 apples get eaten. How many are left?",["28","40","52","1"],0,"Step 1: 8 × 5 = 40. Step 2: 40 − 12 = 28."],
+      ["A store had 600 balloons. It sold 245 on Monday and 180 on Tuesday. How many are left?",["175","425","355","1,025"],0,"Step 1: 245 + 180 = 425 sold. Step 2: 600 − 425 = 175."],
+      ["Movie tickets cost $7. A family buys 4 tickets and pays with $50. How much change?",["$22","$28","$43","$11"],0,"Step 1: 4 × $7 = $28. Step 2: $50 − $28 = $22."],
+      ["A school has 312 boys and 285 girls. 150 students go on a trip. How many stay at school?",["447","597","162","437"],0,"Step 1: 312 + 285 = 597. Step 2: 597 − 150 = 447."],
+      ["A baker made 9 trays of 10 muffins and sold 64. How many muffins are left?",["26","36","90","154"],0,"Step 1: 9 × 10 = 90. Step 2: 90 − 64 = 26."],
+      ["Ben has 245 marbles. Kim has 130 more than Ben. How many marbles do they have together?",["375","620","490","115"],1,"Step 1: Kim has 245 + 130 = 375. Step 2: 245 + 375 = 620."],
+      ["Which number sentence matches: \"There are 6 rows of 4 chairs. 9 chairs are taken. How many are empty?\"",["6 × 4 − 9 = ?","6 + 4 − 9 = ?","6 × 4 + 9 = ?","9 − 6 × 4 = ?"],0,"Multiply to find all the chairs, then subtract the taken ones. (The answer is 15.)"],
+      ["Maya read 124 pages last week. This week she read 89 more pages than last week. How many pages did she read in both weeks?",["213","337","35","248"],1,"Step 1: This week = 124 + 89 = 213. Step 2: 124 + 213 = 337."],
+      ["To check if an answer makes sense, a good first step is to…",["round the numbers and estimate","guess","write the biggest number","skip it"],0,"Estimating tells you about what the answer should be."]
+    ]},
     { id:'addsub', name:'Adding & Subtracting', blurb:'Numbers up to 1,000 and rounding', qs:[
       ["345 + 232 = ?",["577","567","587","477"],0,"5+2=7 ones, 4+3=7 tens, 3+2=5 hundreds → 577."],
       ["508 + 297 = ?",["795","805","815","705"],1,"8+7=15 (carry 1), 0+9+1=10 (carry 1), 5+2+1=8 → 805."],
