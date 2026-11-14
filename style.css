@@ -167,3 +167,21 @@ table th:first-child{font-size:16px}
 .opts.picgrid:has(svg[viewBox="0 0 360 230"]){grid-template-columns:1fr}
 .optpic:has(svg[viewBox="0 0 360 230"]){flex:1}
 .optpic svg[viewBox="0 0 360 230"]{width:100%;max-width:300px;height:auto}
+
+/* ---------- letter grades ---------- */
+.lg{display:inline-block;min-width:34px;padding:1px 7px;border-radius:8px;font-weight:800;font-size:16px;text-align:center;color:#fff}
+.ga{--gc:#2f9e44}.gb{--gc:#1c7ed6}.gc{--gc:#f08c00}.gd{--gc:#e8590c}.gf{--gc:#e03131}
+.lg{background:var(--gc)}
+.subject .grow{flex:1}
+.subgrade{background:rgba(255,255,255,.95);color:var(--ink);border-radius:14px;padding:6px 10px;text-align:center;min-width:62px}
+.subgrade b{display:block;font-size:26px;line-height:1.1}
+.subgrade span{font-size:13px;color:var(--muted);opacity:1}
+.result.paper{background:#fffef8 repeating-linear-gradient(#fffef8 0 31px,#e7eefc 31px 32px);border-left:4px solid #ffc9c9}
+.stamp{width:150px;height:150px;margin:8px auto 4px;border:6px solid var(--gc);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gc);transform:rotate(-8deg);background:#fff;box-shadow:0 0 0 3px #fff;animation:stamp .45s ease-out}
+.stamp .letter{font-size:66px;font-weight:800;line-height:1;font-family:"Comic Sans MS","Chalkboard SE","Marker Felt",Nunito,sans-serif}
+.stamp .pct{font-size:20px;font-weight:800}
+@keyframes stamp{0%{transform:scale(2.2) rotate(-8deg);opacity:0}70%{transform:scale(.92) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg)}}
+.frac{font-size:18px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.up{color:var(--good);font-weight:800;margin:4px 0}
+.report .row span:last-child{white-space:nowrap}
+.tile span.lg,td span.lg,.row span.lg{color:#fff;font-size:16px}

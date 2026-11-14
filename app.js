@@ -30,6 +30,24 @@ function shuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.f
 function local(k, v){ try{ if (v === undefined) return localStorage.getItem('learn:'+k); if (v === null) localStorage.removeItem('learn:'+k); else localStorage.setItem('learn:'+k, v); }catch(e){ return null; } }
 function starsFor(score,total){ const p = total ? score/total : 0; return p>=0.9?3:p>=0.7?2:p>=0.5?1:0; }
 function starText(n){ return '★'.repeat(n)+'☆'.repeat(3-n); }
+// Letter grades on the usual school scale: A 90+, B 80+, C 70+, D 60+, F below 60, with + and −.
+function pctOf(score, total){ return total ? Math.round(100 * score / total) : 0; }
+function letterFor(pct){
+  if (pct >= 97) return 'A+'; if (pct >= 93) return 'A'; if (pct >= 90) return 'A−';
+  if (pct >= 87) return 'B+'; if (pct >= 83) return 'B'; if (pct >= 80) return 'B−';
+  if (pct >= 77) return 'C+'; if (pct >= 73) return 'C'; if (pct >= 70) return 'C−';
+  if (pct >= 67) return 'D+'; if (pct >= 63) return 'D'; if (pct >= 60) return 'D−';
+  return 'F';
+}
+function gradeClass(pct){ return pct >= 90 ? 'ga' : pct >= 80 ? 'gb' : pct >= 70 ? 'gc' : pct >= 60 ? 'gd' : 'gf'; }
+function gradeChip(pct){ return `<span class="lg ${gradeClass(pct)}">${letterFor(pct)}</span>`; }
+// Letter grades are on by default from 2nd grade up; parents can switch them per kid.
+function usesGrades(k){ return k && (k.grades !== undefined ? !!k.grades : !['K','1'].includes(k.grade)); }
+// A subject's overall grade = the average of the best scores on the tests tried (Mixed Practice not counted).
+function subjectAverage(bestMap, s){
+  const rs = s.tests.map(t => bestMap[bestKey(s.grade, s.id, t.id)]).filter(Boolean);
+  return rs.length ? Math.round(rs.reduce((a,r) => a + 100*r.best/r.total, 0) / rs.length) : null;
+}
 function shortDate(ms){ try{ return new Date(ms).toLocaleDateString('en-US',{month:'short',day:'numeric'}); }catch(e){ return ''; } }
 function gradeName(id){ return (GRADES.find(g => g.id === id) || {}).name || ''; }
 function subjectsFor(g){ return SUBJECTS.filter(s => s.grade === g); }
@@ -228,6 +246,7 @@ function kidForm(kid, back){
       <label class="lbl">${esc(k.name || 'Kid')}'s secret PIN</label>
       <p class="note">4 numbers this kid types to open their profile on a shared device, so brothers and sisters can't get in. Linked devices don't ask for it.${kid && kid.pinHash ? ' Leave blank to keep the current PIN.' : ''}</p>
       <input class="pin" type="password" id="kpin" inputmode="numeric" maxlength="4" placeholder="${kid && kid.pinHash ? 'Keep current' : '4 digits'}" autocomplete="off">
+      <label class="check"><input type="checkbox" id="lg" ${usesGrades(kid || { grade:k.grade }) ? 'checked' : ''}> Show letter grades (A, B, C…) like school <span class="note">(otherwise stars)</span></label>
       <label class="check"><input type="checkbox" id="ra" ${k.readAloud?'checked':''}> Read questions out loud automatically <span class="note">(great for kids still learning to read)</span></label>
     </div>
     <p class="err" id="err"></p>
@@ -235,7 +254,10 @@ function kidForm(kid, back){
     ${kid ? `<button class="btn ghost danger" id="del">Remove ${esc(kid.name)}</button><div id="confirm"></div>` : ''}`);
   let grade = k.grade;
   $('back').onclick = back;
-  $('grades').querySelectorAll('.chip').forEach(b => b.onclick = () => { grade = b.dataset.g; $('grades').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); });
+  // The letter-grade box follows the grade picked (on from 2nd grade up) until the parent changes it by hand.
+  let lgTouched = !!kid && kid.grades !== undefined;
+  $('lg').onchange = () => lgTouched = true;
+  $('grades').querySelectorAll('.chip').forEach(b => b.onclick = () => { grade = b.dataset.g; $('grades').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); if (!lgTouched) $('lg').checked = !['K','1'].includes(grade); });
   $('avs').querySelectorAll('.avbtn').forEach(b => b.onclick = () => { avatar = b.dataset.a; $('avs').querySelectorAll('.avbtn').forEach(x => x.classList.toggle('on', x === b)); });
   $('save').onclick = async () => {
     const name = $('name').value.trim().slice(0,20);
@@ -244,7 +266,7 @@ function kidForm(kid, back){
     if (kp && !/^\d{4}$/.test(kp)) return $('err').textContent = 'The kid PIN needs to be 4 numbers.';
     if (!kp && !(kid && kid.pinHash)) return $('err').textContent = 'Give ' + name + ' a 4-number PIN.';
     if (kp && st.family && st.family.pinHash && await hashPin(kp) === st.family.pinHash) return $('err').textContent = 'Use a different PIN than your grown-up PIN.';
-    const data = { name, grade, avatar, readAloud: $('ra').checked, at: kid ? (kid.at || Date.now()) : Date.now(), pinHash: kp ? await hashPin('kid:'+kp) : kid.pinHash };
+    const data = { name, grade, avatar, readAloud: $('ra').checked, grades: $('lg').checked, at: kid ? (kid.at || Date.now()) : Date.now(), pinHash: kp ? await hashPin('kid:'+kp) : kid.pinHash };
     try{
       await DB.set(kidPath(kid ? kid.id : uid8()), data);
       await loadKids();
@@ -318,9 +340,11 @@ function kidHome(){
     <p class="sub">Pick a subject.</p>
     <div class="grid">${subs.map(s => {
       const tried = s.tests.filter(t => st.best[bestKey(s.grade,s.id,t.id)]).length;
+      const avg = usesGrades(k) ? subjectAverage(st.best, s) : null;
       return `<button class="subject" style="background:${s.color}" data-id="${s.id}">
         <div class="icon">${s.icon}</div>
-        <div><b>${esc(s.name)}</b><span>${s.tests.length} tests · ${tried} tried</span></div>
+        <div class="grow"><b>${esc(s.name)}</b><span>${s.tests.length} tests · ${tried} tried</span></div>
+        ${avg !== null ? `<div class="subgrade"><b>${letterFor(avg)}</b><span>${avg}%</span></div>` : ''}
       </button>`; }).join('') || '<p class="note">No tests for this grade yet.</p>'}
       <button class="subject" style="background:${TYPING_COLOR}" id="typing">
         <div class="icon">⌨️</div>
@@ -343,7 +367,9 @@ function subjectPage(s){
     const r = st.best[bestKey(s.grade,s.id,t.id)];
     return `<button class="tile ${extra}" data-id="${t.id}">
       <div><b>${esc(t.name)}</b><span>${esc(t.blurb)}</span></div>
-      ${r ? `<div class="best"><span class="stars">${starText(starsFor(r.best,r.total))}</span><br>Best ${r.best}/${r.total}</div>` : ''}
+      ${r ? (usesGrades(st.kid)
+        ? `<div class="best">${gradeChip(pctOf(r.best,r.total))}<br>Best ${pctOf(r.best,r.total)}%</div>`
+        : `<div class="best"><span class="stars">${starText(starsFor(r.best,r.total))}</span><br>Best ${r.best}/${r.total}</div>`) : ''}
     </button>`;
   };
   screen(`
@@ -436,20 +462,27 @@ async function done(){
   const key = bestKey(s.grade, s.id, testId), prev = st.best[key];
   const rec = { g:s.grade, s:s.id, t:testId, name, best:Math.max(score, prev ? prev.best : 0), total:n, last:score, date:Date.now(), tries:(prev ? prev.tries : 0) + 1 };
   st.best[key] = { id:key, ...rec };
-  const stars = starsFor(score, n);
-  const msg = score===n ? 'Perfect score!' : stars===3 ? 'Awesome work!' : stars===2 ? 'Good job! Keep practicing!' : 'Nice try! Let\'s practice these again!';
+  const stars = starsFor(score, n), pct = pctOf(score, n), letter = letterFor(pct), graded = usesGrades(st.kid);
+  const msg = graded
+    ? (score===n ? 'Perfect paper! 💯' : pct>=90 ? 'Excellent work!' : pct>=80 ? 'Great job!' : pct>=70 ? 'Good effort. Review the ones you missed.' : pct>=60 ? 'Keep practicing. You can bring this grade up!' : 'Let\'s study the misses and try again.')
+    : (score===n ? 'Perfect score!' : stars===3 ? 'Awesome work!' : stars===2 ? 'Good job! Keep practicing!' : 'Nice try! Let\'s practice these again!');
+  const prevPct = prev ? pctOf(prev.best, prev.total) : null;
   screen(`
-    <div class="result">
+    <div class="result ${graded ? 'paper' : ''}">
       <div class="num">${esc(st.kid.name)} · ${esc(s.name)} · ${esc(name)}</div>
+      ${graded ? `
+      <div class="stamp ${gradeClass(pct)}"><span class="letter">${letter}</span><span class="pct">${pct}%</span></div>
+      <div class="frac">${score} / ${n} correct</div>
+      ${prevPct !== null && pct > prevPct ? `<p class="up">⬆ New best! Up from ${letterFor(prevPct)} (${prevPct}%)</p>` : ''}` : `
       <div class="stars">${starText(stars)}</div>
-      <div class="big">${score} / ${n}</div>
+      <div class="big">${score} / ${n}</div>`}
       <p><b>${msg}</b></p>
       <p class="note" id="saved">Saving…</p>
       <button class="btn" id="again">Try again</button>
       <button class="btn ghost" id="more">Pick another test</button>
       <div class="review"><b>Look back</b>${log.map((l,i)=>`<div><span class="${l.ok?'ok':'no'}">${l.ok?'✓':'✗'}</span> ${i+1}. ${esc(l.text)}${l.ok?'':`<br><small>Answer: ${esc(l.correct)}</small>`}</div>`).join('')}</div>
     </div>`);
-  if (st.kid.readAloud) speak(`You got ${score} out of ${n}. ${msg}`);
+  if (st.kid.readAloud) speak(graded ? `You got ${score} out of ${n}. That's ${pct} percent, ${letter.replace('+',' plus').replace('−',' minus')}. ${msg}` : `You got ${score} out of ${n}. ${msg}`);
   $('again').onclick = () => startQuiz(s, testId);
   $('more').onclick = () => subjectPage(s);
   const kp = kidPath(st.kid.id);
@@ -678,15 +711,18 @@ async function parentHome(){
   $('body').innerHTML = `
     <div class="stats">
       <div><b>${tried.length}</b><span>tests tried</span></div>
-      <div><b>${tried.length ? avg+'%' : '–'}</b><span>average best</span></div>
+      <div><b>${tried.length ? letterFor(avg)+' · '+avg+'%' : '–'}</b><span>average best</span></div>
       <div><b>${lastAt ? shortDate(lastAt) : '–'}</b><span>last practiced</span></div>
     </div>
-    ${weak.length ? `<h2>Needs practice</h2><div class="card weak">${weak.slice(0,6).map(b => `<div class="row"><span>${esc(subName(b.g,b.s))} · ${esc(testName(b.g,b.s,b.t))} <small class="note">(${gradeName(b.g)})</small></span><b class="no">${b.best}/${b.total}</b></div>`).join('')}</div>` : ''}
+    <h2>📋 Report card <small class="note">(${gradeName(kid.grade)})</small></h2>
+    <div class="card report">${subjectsFor(kid.grade).map(s => { const a = subjectAverage(bmap, s); const n = s.tests.filter(t => bmap[bestKey(s.grade,s.id,t.id)]).length;
+      return `<div class="row"><span>${s.icon} ${esc(s.name)} <small class="note">${n} of ${s.tests.length} tests</small></span>${a !== null ? `<span>${gradeChip(a)} <b>${a}%</b></span>` : '<span class="note">–</span>'}</div>`; }).join('')}</div>
+    ${weak.length ? `<h2>Needs practice</h2><div class="card weak">${weak.slice(0,6).map(b => `<div class="row"><span>${esc(subName(b.g,b.s))} · ${esc(testName(b.g,b.s,b.t))} <small class="note">(${gradeName(b.g)})</small></span><b class="no">${letterFor(pctOf(b.best,b.total))} · ${pctOf(b.best,b.total)}%</b></div>`).join('')}</div>` : ''}
     ${grades.map(g => `<details class="gradebox" ${g.id===kid.grade?'open':''}><summary><h2>${g.name}${g.id===kid.grade?` <small class="note">(${esc(kid.name)}'s grade)</small>`:''}</h2></summary>
       ${subjectsFor(g.id).map(s => `<table><tr><th>${s.icon} ${esc(s.name)}</th><th>Best</th><th>Last</th><th>Tries</th></tr>
         ${[...s.tests, {id:'mixed', name:'Mixed Practice'}].map(t => { const r = bmap[bestKey(g.id,s.id,t.id)];
           return `<tr><td>${esc(t.name)}</td>${r
-            ? `<td class="n"><span class="stars">${starText(starsFor(r.best,r.total))}</span>${r.best}/${r.total}</td><td class="n">${r.last}/${r.total}<br><small>${shortDate(r.date)}</small></td><td class="n">${r.tries}</td>`
+            ? `<td class="n">${gradeChip(pctOf(r.best,r.total))} ${pctOf(r.best,r.total)}%</td><td class="n">${pctOf(r.last,r.total)}%<br><small>${shortDate(r.date)}</small></td><td class="n">${r.tries}</td>`
             : '<td colspan="3" class="note">Not tried yet</td>'}</tr>`; }).join('')}
       </table>`).join('')}</details>`).join('')}
     <h2>⌨️ Typing</h2>
@@ -698,7 +734,7 @@ async function parentHome(){
     </table>
     <h2>Recent tests</h2>
     ${attempts.length ? `<div class="list">${attempts.map(a => `
-      <details class="attempt"><summary><span>${shortDate(a.at)} · ${esc(subName(a.g,a.s))} · ${esc(a.name || testName(a.g,a.s,a.t))}${a.g!==kid.grade?` <small class="note">(${gradeName(a.g)})</small>`:''}</span><b class="${a.score/a.total>=0.7?'ok':'no'}">${a.s==='typing' ? (a.t==='hunt' ? '' : a.wpm+' WPM · ') + a.acc+'%' : a.score+'/'+a.total}</b></summary>
+      <details class="attempt"><summary><span>${shortDate(a.at)} · ${esc(subName(a.g,a.s))} · ${esc(a.name || testName(a.g,a.s,a.t))}${a.g!==kid.grade?` <small class="note">(${gradeName(a.g)})</small>`:''}</span><b class="${a.score/a.total>=0.7?'ok':'no'}">${a.s==='typing' ? (a.t==='hunt' ? '' : a.wpm+' WPM · ') + a.acc+'%' : letterFor(pctOf(a.score,a.total))+' · '+pctOf(a.score,a.total)+'% ('+a.score+'/'+a.total+')'}</b></summary>
         ${a.s==='typing' ? `<p class="note">${starText(a.score)} · ${a.keys && a.keys.length ? 'Keys to practice: ' + a.keys.map(k => `<span class="kchip">${esc(k)}</span>`).join(' ') : 'No trouble keys!'}</p>` : a.missed && a.missed.length ? a.missed.map(m => `<div class="miss"><div>${esc(m.q)}</div><small><span class="no">Picked: ${esc(m.their)}</span> · <span class="ok">Answer: ${esc(m.a)}</span></small></div>`).join('') : '<p class="note">No misses. Perfect score!</p>'}
       </details>`).join('')}</div>` : `<p class="note">${esc(kid.name)} hasn't taken a test yet.</p>`}`;
 }
