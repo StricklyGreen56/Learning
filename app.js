@@ -373,15 +373,20 @@ function startQuiz(s, testId){
   }
   st.quiz = {
     s, testId, name, i:0, score:0, log:[],
-    qs: qs.map(([text, opts, ans, why, p, flag]) => {
+    qs: qs.map(([text, opts, ans, why, p, flag, pic]) => {
       const order = keepOrder(opts) ? opts.map((_,k)=>k) : shuffle(opts.map((_,k)=>k));
-      return { text, why, p, quiet: flag === 'quiet', opts: order.map(k => opts[k]), ans: order.indexOf(ans) };
+      return { text, why, p, pic, quiet: flag === 'quiet' || opts.some(isPic), opts: order.map(k => opts[k]), ans: order.indexOf(ans) };
     })
   };
   renderQ();
 }
 
 // 'quiet' questions (like "find the word see") read only the question, since saying the options gives the answer away.
+// Pictures: a question can show one (7th item), and an answer choice can be 'pic:key'.
+const isPic = o => typeof o === 'string' && o.startsWith('pic:');
+const picOf = key => (window.PICS || {})[key];
+function optText(o){ if (!isPic(o)) return o; const p = picOf(o.slice(4)); return p ? p.label : o.slice(4); }
+function optHTML(o){ if (!isPic(o)) return esc(o); const p = picOf(o.slice(4)); return p ? `<span class="optpic">${p.svg}</span>` : esc(o.slice(4)); }
 function readQ(q){ speak(q.quiet ? q.text : q.text + '. ' + q.opts.map((o,k) => String.fromCharCode(97+k)+'. '+o).join('. ')); }
 
 function renderQ(){
@@ -397,7 +402,8 @@ function renderQ(){
     <div class="q">
       <div class="qhead"><span class="num">${esc(name)}</span>${canSpeak?'<button class="say" id="sayq">🔊 Read to me</button>':''}</div>
       <div class="qtext">${esc(q.text)}</div>
-      <div class="opts">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${String.fromCharCode(97+k)}) ${esc(o)}</button>`).join('')}</div>
+      ${q.pic && picOf(q.pic) ? `<div class="qpic" role="img" aria-label="${esc(picOf(q.pic).label)}">${picOf(q.pic).svg}</div>` : ''}
+      <div class="opts ${q.opts.every(isPic) ? 'picgrid' : ''}">${q.opts.map((o,k)=>`<button class="opt" data-k="${k}">${String.fromCharCode(97+k)}) ${optHTML(o)}</button>`).join('')}</div>
       <div id="fb"></div>
     </div>`);
   $('back').onclick = () => subjectPage(s);
@@ -412,7 +418,7 @@ function renderQ(){
 function answer(k){
   const z = st.quiz, q = z.qs[z.i], ok = k === q.ans;
   if (ok) z.score++;
-  z.log.push({ text:q.text, ok, correct:q.opts[q.ans], their:q.opts[k] });
+  z.log.push({ text:q.text, ok, correct:optText(q.opts[q.ans]), their:optText(q.opts[k]) });
   app.querySelectorAll('.opt').forEach((b,j) => { b.disabled = true; if (j===q.ans) b.classList.add('right'); else if (j===k) b.classList.add('wrong'); });
   const last = z.i === z.qs.length-1;
   const cheers = ['Great job!','You got it!','Nice work!','Awesome!','Correct!'];

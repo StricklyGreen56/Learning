@@ -26,6 +26,8 @@ Questions live in `data/g<grade>/`. Each question is one line:
 
 The number is which option is correct, counting from 0 (so `1` means the second option). Options are shuffled when the test runs.
 Optional 5th item: a story key from `passages`. Optional 6th item: `'quiet'` so read-aloud doesn't read the options (for "find the word" questions).
+Optional 7th item: a picture key from `pics.js` to show above the question. An answer choice written `'pic:key'` shows that picture as the choice.
+Pictures are drawn as SVG in `pics.js`. `runRobot()` there can check robot-maze answers.
 
 ## After changing files
 Bump the `?v=` number on the script and style tags in `index.html` so browsers load the new version instead of an old cached copy.
