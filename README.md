@@ -11,6 +11,9 @@ Live site: https://stricklygreen56.github.io/Learning/
 - Scores save to Firebase under the parent's account, so the **🔒 Grown-ups** page (PIN protected) shows every kid's scores from any device: best scores, what needs practice, and recent tests with the questions they missed.
 - 🔊 **Read to me** reads questions aloud. Turn on automatic read-aloud per kid for early readers.
 
+## Code Lab
+`codelab.js` is a beginner block-coding game (13 levels: sequence, debugging, loops, if-statements). Levels are data at the top of the file. `labRun()` runs a program without the page, so new levels can be checked with node.
+
 ## Firebase
 Uses its own Firebase project (`learning-1be34`, free Spark plan). Sign-in providers: Google (parents) and Anonymous (linked kid devices). Data lives under `families/{parent uid}`.
 If `firestore.rules` changes, paste it into Firebase Console → Firestore Database → Rules → Publish.

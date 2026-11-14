@@ -350,6 +350,10 @@ function kidHome(){
         <div class="icon">⌨️</div>
         <div><b>Typing Game</b><span>${TYPING_LEVELS.length} levels · ${TYPING_LEVELS.filter(l => typingRec(l)).length} tried</span></div>
       </button>
+      <button class="subject" style="background:${LAB_COLOR}" id="codelab">
+        <div class="icon">🤖</div>
+        <div><b>Code Lab</b><span>Learn to code · ${LAB_LEVELS.filter(l => (labRec(l)||{}).best).length} of ${LAB_LEVELS.length} levels done</span></div>
+      </button>
     </div>
     <div class="othergrades">
       <p class="note">Want it easier or harder? Try another grade:</p>
@@ -358,6 +362,7 @@ function kidHome(){
   $('switch').onclick = () => st.device ? deviceGate() : whoPage();
   app.querySelectorAll('.subject[data-id]').forEach(b => b.onclick = () => subjectPage(subs.find(s => s.id === b.dataset.id)));
   $('typing').onclick = typingHome;
+  $('codelab').onclick = labHome;
   app.querySelectorAll('.othergrades .chip').forEach(b => b.onclick = () => { st.grade = b.dataset.g; kidHome(); });
 }
 
@@ -700,11 +705,11 @@ async function parentHome(){
   }catch(e){ if ($('body')) $('body').innerHTML = '<p class="err">Couldn\'t load scores. Check your connection.</p>'; return; }
   if (!$('body') || st.parentKid !== kid.id) return;
   const bmap = {}; best.forEach(b => bmap[b.id] = b);
-  const tried = best.filter(b => b.t !== 'mixed' && b.g !== 'T');
+  const tried = best.filter(b => b.t !== 'mixed' && b.g !== 'T' && b.g !== 'C');
   const avg = tried.length ? Math.round(100 * tried.reduce((a,b) => a + b.best/b.total, 0) / tried.length) : 0;
   const lastAt = attempts[0] ? attempts[0].at : 0;
-  const testName = (g,s,t) => { if (s === 'typing'){ const l = TYPING_LEVELS.find(x => x.id === t); return l ? l.name : t; } const sub = SUBJECTS.find(x => x.grade===g && x.id===s); const tt = sub && sub.tests.find(x => x.id===t); return (tt ? tt.name : t === 'mixed' ? 'Mixed Practice' : t); };
-  const subName = (g,s) => { if (s === 'typing') return '⌨️ Typing'; const sub = SUBJECTS.find(x => x.grade===g && x.id===s); return sub ? sub.icon+' '+sub.name : s; };
+  const testName = (g,s,t) => { if (s === 'coding'){ const l = LAB_LEVELS.find(x => x.id === t); return l ? l.name : t; } if (s === 'typing'){ const l = TYPING_LEVELS.find(x => x.id === t); return l ? l.name : t; } const sub = SUBJECTS.find(x => x.grade===g && x.id===s); const tt = sub && sub.tests.find(x => x.id===t); return (tt ? tt.name : t === 'mixed' ? 'Mixed Practice' : t); };
+  const subName = (g,s) => { if (s === 'typing') return '⌨️ Typing'; if (s === 'coding') return '🤖 Code Lab'; const sub = SUBJECTS.find(x => x.grade===g && x.id===s); return sub ? sub.icon+' '+sub.name : s; };
   const weak = tried.filter(b => b.best/b.total < 0.7).sort((a,b) => a.best/a.total - b.best/b.total);
   const grades = GRADES.filter(g => g.id === kid.grade || best.some(b => b.g === g.id));
 
@@ -732,10 +737,17 @@ async function parentHome(){
           ? `<td class="n"><span class="stars">${starText(r.best)}</span>${r.acc}%</td><td class="n">${l.mode==='letters' ? '–' : r.wpm+' WPM'}<br><small>${shortDate(r.date)}</small></td><td class="n">${r.tries}</td>`
           : '<td colspan="3" class="note">Not tried yet</td>'}</tr>`; }).join('')}
     </table>
+    <h2>🤖 Code Lab</h2>
+    <table><tr><th>Level</th><th>Stars</th><th>Blocks</th><th>Tries</th></tr>
+      ${LAB_LEVELS.map((l,i) => { const r = bmap[bestKey('C','coding',l.id)];
+        return `<tr><td>${i+1}. ${esc(l.name)} <small class="note">${esc(l.ch.replace(/^\d+\.\s*/,''))}</small></td>${r
+          ? `<td class="n"><span class="stars">${r.best ? starText(r.best) : 'Not solved'}</span></td><td class="n">${r.blocks || '–'}</td><td class="n">${r.tries}<br><small>${shortDate(r.date)}</small></td>`
+          : '<td colspan="3" class="note">Not tried yet</td>'}</tr>`; }).join('')}
+    </table>
     <h2>Recent tests</h2>
     ${attempts.length ? `<div class="list">${attempts.map(a => `
-      <details class="attempt"><summary><span>${shortDate(a.at)} · ${esc(subName(a.g,a.s))} · ${esc(a.name || testName(a.g,a.s,a.t))}${a.g!==kid.grade?` <small class="note">(${gradeName(a.g)})</small>`:''}</span><b class="${a.score/a.total>=0.7?'ok':'no'}">${a.s==='typing' ? (a.t==='hunt' ? '' : a.wpm+' WPM · ') + a.acc+'%' : letterFor(pctOf(a.score,a.total))+' · '+pctOf(a.score,a.total)+'% ('+a.score+'/'+a.total+')'}</b></summary>
-        ${a.s==='typing' ? `<p class="note">${starText(a.score)} · ${a.keys && a.keys.length ? 'Keys to practice: ' + a.keys.map(k => `<span class="kchip">${esc(k)}</span>`).join(' ') : 'No trouble keys!'}</p>` : a.missed && a.missed.length ? a.missed.map(m => `<div class="miss"><div>${esc(m.q)}</div><small><span class="no">Picked: ${esc(m.their)}</span> · <span class="ok">Answer: ${esc(m.a)}</span></small></div>`).join('') : '<p class="note">No misses. Perfect score!</p>'}
+      <details class="attempt"><summary><span>${shortDate(a.at)} · ${esc(subName(a.g,a.s))} · ${esc(a.name || testName(a.g,a.s,a.t))}${a.g!==kid.grade?` <small class="note">(${gradeName(a.g)})</small>`:''}</span><b class="${a.score/a.total>=0.7?'ok':'no'}">${a.s==='coding' ? starText(a.score) : a.s==='typing' ? (a.t==='hunt' ? '' : a.wpm+' WPM · ') + a.acc+'%' : letterFor(pctOf(a.score,a.total))+' · '+pctOf(a.score,a.total)+'% ('+a.score+'/'+a.total+')'}</b></summary>
+        ${a.s==='coding' ? `<p class="note">Solved it with ${a.blocks} block${a.blocks===1?'':'s'}.</p>` : a.s==='typing' ? `<p class="note">${starText(a.score)} · ${a.keys && a.keys.length ? 'Keys to practice: ' + a.keys.map(k => `<span class="kchip">${esc(k)}</span>`).join(' ') : 'No trouble keys!'}</p>` : a.missed && a.missed.length ? a.missed.map(m => `<div class="miss"><div>${esc(m.q)}</div><small><span class="no">Picked: ${esc(m.their)}</span> · <span class="ok">Answer: ${esc(m.a)}</span></small></div>`).join('') : '<p class="note">No misses. Perfect score!</p>'}
       </details>`).join('')}</div>` : `<p class="note">${esc(kid.name)} hasn't taken a test yet.</p>`}`;
 }
 
